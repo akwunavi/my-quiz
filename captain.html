@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Quiz — Капитан</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#07071a;--purple:#8B5CF6;--gold:#F59E0B;--mint:#10F5A0;--red:#f87171;--white:#F0EFF8;--dim:rgba(240,239,248,0.5)}
+body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.bg{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(139,92,246,.15) 0%,transparent 60%)}
+
+/* TEAM SELECT */
+.page{width:100%;max-width:380px;text-align:center;display:none}
+.page.active{display:block}
+.eye{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--mint);font-weight:500;margin-bottom:12px}
+.big{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;margin-bottom:6px}
+.sub{font-size:14px;color:var(--dim);margin-bottom:28px}
+
+/* TEAM BUTTONS */
+.ts-btn{width:100%;padding:16px;border-radius:16px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);font-size:16px;font-weight:600;font-family:'Syne',sans-serif;color:var(--white);cursor:pointer;margin-bottom:10px;transition:all .2s;display:flex;align-items:center;gap:12px;text-align:left}
+.ts-btn:nth-child(1){border-color:rgba(245,158,11,.3)}.ts-btn:nth-child(1):active{background:rgba(245,158,11,.15)}
+.ts-btn:nth-child(2){border-color:rgba(16,245,160,.3)}.ts-btn:nth-child(2):active{background:rgba(16,245,160,.15)}
+.ts-btn:nth-child(3){border-color:rgba(139,92,246,.3)}.ts-btn:nth-child(3):active{background:rgba(139,92,246,.15)}
+.ts-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+
+/* NAME INPUT PAGE */
+.name-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;margin-bottom:24px;border:1px solid rgba(255,255,255,.15)}
+.name-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:18px 20px;font-size:20px;font-weight:600;color:var(--white);font-family:'Syne',sans-serif;outline:none;transition:all .2s;margin-bottom:16px;text-align:center;-webkit-appearance:none}
+.name-input:focus{border-color:rgba(139,92,246,.6);background:rgba(139,92,246,.08)}
+.name-input::placeholder{color:rgba(255,255,255,.2);font-weight:400;font-size:16px}
+.name-hint{font-size:13px;color:var(--dim);margin-bottom:24px}
+
+/* ANSWER PAGE */
+.team-badge{display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:20px;border:1px solid;width:fit-content;margin-left:auto;margin-right:auto}
+.q-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px;width:100%;text-align:center;margin-bottom:16px;min-height:70px;display:flex;align-items:center;justify-content:center}
+.q-box-text{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;line-height:1.4;color:var(--dim)}
+.q-box-text.active{color:var(--white)}
+.ans-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:16px 18px;font-size:18px;font-weight:500;color:var(--white);font-family:'Inter',sans-serif;outline:none;transition:all .2s;margin-bottom:12px;-webkit-appearance:none}
+.ans-input:focus{border-color:rgba(139,92,246,.6);background:rgba(139,92,246,.08)}
+.ans-input::placeholder{color:rgba(255,255,255,.2)}
+.send-btn{width:100%;padding:18px;border-radius:16px;border:none;font-size:16px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:all .25s;margin-bottom:10px}
+.send-btn.ready{background:linear-gradient(135deg,var(--purple),#6D28D9);color:#fff;box-shadow:0 4px 24px rgba(139,92,246,.4)}
+.send-btn.off{background:rgba(255,255,255,.07);color:rgba(255,255,255,.3);pointer-events:none}
+.small-link{font-size:12px;color:var(--dim);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* WAIT / SENT */
+.wait-box{text-align:center;padding:16px 0}
+.wait-icon{font-size:36px;margin-bottom:10px;animation:pulse 1.5s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.wait-text{font-size:14px;color:var(--dim);line-height:1.7}
+.sent-box{background:rgba(16,245,160,.08);border:1px solid rgba(16,245,160,.25);border-radius:18px;padding:24px;text-align:center;width:100%;margin-bottom:14px}
+.sent-icon{font-size:36px;margin-bottom:8px}
+.sent-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--mint);margin-bottom:6px}
+.sent-ans{font-size:14px;color:var(--dim)}
+.sent-ans span{color:var(--white);font-weight:600}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .25s;font-family:'Inter',sans-serif;width:100%}
+.btn-primary{background:linear-gradient(135deg,var(--purple),#6D28D9);color:#fff;box-shadow:0 4px 24px rgba(139,92,246,.4)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#D97706);color:#07071a}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(16,245,160,.15);border:1px solid rgba(16,245,160,.4);border-radius:100px;padding:10px 22px;font-size:14px;font-weight:600;color:var(--mint);opacity:0;transition:all .4s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:rgba(248,113,113,.15);border-color:rgba(248,113,113,.4);color:var(--red)}
+
+.conn{position:fixed;top:14px;right:14px;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.2)}
+.conn.ok{background:var(--mint);box-shadow:0 0 8px var(--mint)}
+.conn.err{background:var(--red)}
+.cap-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;width:100%}
+.cap-opt-btn{padding:18px 10px;border-radius:14px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:var(--white);font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;text-align:center;width:100%}
+.cap-opt-btn:active{transform:scale(.96);background:rgba(139,92,246,.25);border-color:var(--purple)}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="conn" id="conn"></div>
+
+<!-- ШАГ 1: выбор команды -->
+<div class="page active" id="pg-team">
+  <p class="eye">🎂 Quiz Night</p>
+  <h1 class="big">Привет!</h1>
+  <p class="sub">Выбери свою команду</p>
+  <button class="ts-btn" onclick="pickTeam(0)"><div class="ts-dot" style="background:var(--gold)"></div><span id="tn-0">Команда 1</span></button>
+  <button class="ts-btn" onclick="pickTeam(1)"><div class="ts-dot" style="background:var(--mint)"></div><span id="tn-1">Команда 2</span></button>
+  <button class="ts-btn" onclick="pickTeam(2)"><div class="ts-dot" style="background:var(--purple)"></div><span id="tn-2">Команда 3</span></button>
+</div>
+
+<!-- ШАГ 2: ввод названия команды -->
+<div class="page" id="pg-name">
+  <p class="eye">🎂 Quiz Night</p>
+  <div class="name-badge" id="name-badge"></div>
+  <h2 class="big">Как называется<br>ваша команда?</h2>
+  <p class="name-hint">Придумайте крутое название 👇</p>
+  <input class="name-input" id="name-input" placeholder="Введите название..." maxlength="20"
+    oninput="checkName()" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmName()}">
+  <button class="btn btn-primary" id="name-btn" style="opacity:.4;pointer-events:none" onclick="confirmName()">Готово →</button>
+</div>
+
+<!-- ШАГ 3: ответы -->
+<div class="page" id="pg-answer">
+  <div class="team-badge" id="ans-badge"></div>
+  <div class="q-box"><p class="q-box-text" id="q-text">Ожидаем вопрос...</p></div>
+
+  <div id="state-wait" class="wait-box">
+    <div class="wait-icon">⏳</div>
+    <p class="wait-text">Ведущий ещё не открыл вопрос.<br>Жди — появится автоматически!</p>
+  </div>
+
+  <div id="state-input" style="display:none;width:100%">
+    <div id="cap-options-area" style="display:none;width:100%">
+      <div class="cap-options" id="cap-options-grid"></div>
+    </div>
+    <div id="cap-text-area" style="width:100%">
+      <input class="ans-input" id="ans-input" placeholder="Введи ответ..." autocomplete="off" autocorrect="off" spellcheck="false"
+        oninput="checkAns()" onkeydown="if(event.key==='Enter'){event.preventDefault();sendAnswer()}">
+      <button class="send-btn off" id="send-btn" onclick="sendAnswer()">Отправить ответ</button>
+    </div>
+    <div style="text-align:center"><span class="small-link" onclick="backToTeams()">← Сменить команду</span></div>
+  </div>
+
+  <div id="state-sent" style="display:none;width:100%">
+    <div class="sent-box">
+      <div class="sent-icon">✅</div>
+      <div class="sent-title">Отправлено!</div>
+      <div class="sent-ans">Ваш ответ: <span id="sent-text"></span></div>
+    </div>
+    <div style="text-align:center"><span class="small-link" onclick="backToTeams()">← Сменить команду</span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+var SUPABASE_URL = 'https://tdumnctlgdtscydmbxrg.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_lCYRT_995HnSgMTpesu9lQ_3JAAabNl';
+var CHANNEL  = 'quiz-room';
+var COLORS   = ['var(--gold)','var(--mint)','var(--purple)'];
+var BORDERS  = ['rgba(245,158,11,.4)','rgba(16,245,160,.4)','rgba(139,92,246,.4)'];
+var EMOJIS   = ['🥇','🥈','🥉'];
+
+var myTeam = null, myName = '', myTeamName = '';
+var currentQ = null, hasSent = false;
+var sb, ch;
+
+/* ── PAGES ── */
+function showPage(id) {
+  ['pg-team','pg-name','pg-answer'].forEach(function(p){
+    document.getElementById(p).classList.toggle('active', p === id);
+  });
+}
+
+/* ── STEP 1: pick team ── */
+function pickTeam(idx) {
+  myTeam = idx;
+  myTeamName = document.getElementById('tn-' + idx).textContent;
+  var badge = document.getElementById('name-badge');
+  badge.style.color = COLORS[idx];
+  badge.style.borderColor = BORDERS[idx];
+  badge.innerHTML = EMOJIS[idx] + ' ' + myTeamName;
+  showPage('pg-name');
+  setTimeout(function(){ document.getElementById('name-input').focus(); }, 300);
+}
+
+/* ── STEP 2: team name ── */
+function checkName() {
+  var v = document.getElementById('name-input').value.trim();
+  var btn = document.getElementById('name-btn');
+  btn.style.opacity = v ? '1' : '.4';
+  btn.style.pointerEvents = v ? 'auto' : 'none';
+}
+function confirmName() {
+  var v = document.getElementById('name-input').value.trim();
+  if (!v) return;
+  myName = v;
+  // обновляем бейдж в ответах
+  var ab = document.getElementById('ans-badge');
+  ab.style.borderColor = BORDERS[myTeam];
+  ab.style.color = COLORS[myTeam];
+  ab.innerHTML = '<span style="font-size:18px">' + EMOJIS[myTeam] + '</span> ' + myName;
+  showPage('pg-answer');
+  connect();
+}
+
+/* ── BACK ── */
+function backToTeams() {
+  myTeam = null; myName = ''; currentQ = null; hasSent = false;
+  document.getElementById('name-input').value = '';
+  showPage('pg-team');
+  if (sb && ch) sb.removeChannel(ch);
+}
+
+/* ── SUPABASE ── */
+function connect() {
+  try {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    ch = sb.channel(CHANNEL, { config: { broadcast: { self: false } } });
+
+    ch.on('broadcast', { event: 'question-open' }, function(payload){
+      currentQ = payload.payload; hasSent = false; showQ(payload.payload.text, payload.payload.options);
+    });
+    ch.on('broadcast', { event: 'question-close' }, function(){
+      currentQ = null; showWait();
+    });
+    ch.on('broadcast', { event: 'current-question' }, function(payload){
+      if (payload.payload && !currentQ) { currentQ = payload.payload; if (!hasSent) showQ(payload.payload.text); }
+    });
+
+    ch.subscribe(function(status){
+      if (status === 'SUBSCRIBED') {
+        document.getElementById('conn').className = 'conn ok';
+        // публикуем название команды
+        ch.send({ type: 'broadcast', event: 'team-name-update', payload: { team: myTeam, name: myName } });
+        ch.send({ type: 'broadcast', event: 'request-current', payload: { team: myTeam } });
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+        document.getElementById('conn').className = 'conn err';
+      }
+    });
+  } catch(e) { showToast('Ошибка подключения', true); document.getElementById('conn').className = 'conn err'; }
+}
+
+/* ── STATES ── */
+function showWait() {
+  document.getElementById('q-text').textContent = 'Ожидаем вопрос...';
+  document.getElementById('q-text').className = 'q-box-text';
+  document.getElementById('state-wait').style.display = 'block';
+  document.getElementById('state-input').style.display = 'none';
+  document.getElementById('state-sent').style.display = 'none';
+}
+function showQ(text, options) {
+  document.getElementById('q-text').textContent = text;
+  document.getElementById('q-text').className = 'q-box-text active';
+  if (hasSent) { showSent(document.getElementById('sent-text').textContent); return; }
+  document.getElementById('state-wait').style.display = 'none';
+  document.getElementById('state-input').style.display = 'block';
+  document.getElementById('state-sent').style.display = 'none';
+  document.getElementById('ans-input').value = '';
+  checkAns();
+
+  var optArea = document.getElementById('cap-options-area');
+  var txtArea = document.getElementById('cap-text-area');
+  if (options && options.length) {
+    var letters = ['А','Б','В','Г'];
+    document.getElementById('cap-options-grid').innerHTML = options.map(function(opt, i) {
+      var l = letters[i] || (i+1);
+      return '<button class="cap-opt-btn" onclick="sendOptionAnswer(\'' + l + '\')">' + l + '. ' + opt + '</button>';
+    }).join('');
+    optArea.style.display = 'block';
+    txtArea.style.display = 'none';
+  } else {
+    optArea.style.display = 'none';
+    txtArea.style.display = 'block';
+    setTimeout(function(){ document.getElementById('ans-input').focus(); }, 300);
+  }
+}
+function showSent(ans) {
+  document.getElementById('state-wait').style.display = 'none';
+  document.getElementById('state-input').style.display = 'none';
+  document.getElementById('state-sent').style.display = 'block';
+  document.getElementById('sent-text').textContent = ans;
+}
+
+/* ── SEND ── */
+function checkAns() {
+  var v = document.getElementById('ans-input').value.trim();
+  var btn = document.getElementById('send-btn');
+  btn.className = 'send-btn ' + (v ? 'ready' : 'off');
+}
+function sendOptionAnswer(letter) {
+  if (hasSent || myTeam === null) return;
+  ch.send({ type: 'broadcast', event: 'answer', payload: { team: myTeam, teamName: myName, answer: letter, questionId: currentQ && currentQ.id } })
+    .then(function(){ hasSent = true; showSent(letter); showToast('✅ Ответ отправлен!'); })
+    .catch(function(){ showToast('❌ Ошибка отправки', true); });
+}
+function sendAnswer() {
+  var v = document.getElementById('ans-input').value.trim();
+  if (!v || myTeam === null) return;
+  ch.send({ type: 'broadcast', event: 'answer', payload: { team: myTeam, teamName: myName, answer: v, questionId: currentQ && currentQ.id } })
+    .then(function(){ hasSent = true; showSent(v); showToast('✅ Ответ отправлен!'); })
+    .catch(function(){ showToast('❌ Ошибка отправки', true); });
+}
+
+/* ── TOAST ── */
+function showToast(msg, isErr) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isErr ? ' err' : '');
+  setTimeout(function(){ t.className = 'toast'; }, 2500);
+}
+
+</script>
+</body>
+</html>
