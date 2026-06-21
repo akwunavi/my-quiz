@@ -124,11 +124,13 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 .ans-team-row.correct .ans-chk{background:var(--mint);border-color:var(--mint)}
 .ans-team-row.correct .ans-chk::after{opacity:1}
 .ans-team-row.suggest-correct{border-color:rgba(16,245,160,.3)}
+.ans-team-row.partial-match{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.06)}
 .ans-team-row.was-awarded{opacity:.5}
 .ans-team-row.dim-row{opacity:.45;padding:7px 14px}
 .ans-team-row.dim-row .ans-chk{width:16px;height:16px}
 .ans-noanswer-label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin:14px 0 6px;padding-left:4px}
 .auto-tag{font-size:10px;color:var(--mint);font-weight:600;background:rgba(16,245,160,.12);padding:2px 8px;border-radius:100px;margin-left:6px;vertical-align:middle}
+.auto-tag.partial-tag{color:var(--gold);background:rgba(245,158,11,.14)}
 .ans-chk{width:22px;height:22px;border-radius:7px;border:2px solid rgba(255,255,255,.2);background:transparent;flex-shrink:0;position:relative;transition:all .2s}
 .ans-chk::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;font-weight:800;color:#07071a;opacity:0;transition:opacity .2s}
 .ans-team-info{flex:1;min-width:0}
@@ -284,19 +286,19 @@ audio.hidden-audio{display:none}
 /* LEADERBOARD (титры) */
 .lb-eye{font-size:12px;letter-spacing:4px;color:var(--mint);font-weight:600;margin-bottom:10px;text-align:center}
 .lb-title{font-family:'Syne',sans-serif;font-size:clamp(26px,4vw,46px);font-weight:800;text-align:center;margin-bottom:28px}
-.lb-list{width:100%;max-width:560px;max-height:60vh;overflow-y:auto;padding:0 8px}
-.lb-row{display:flex;align-items:center;gap:14px;padding:12px 18px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);margin-bottom:8px;transition:opacity .5s ease,transform .5s ease}
+.lb-list{width:100%;max-width:680px;max-height:62vh;overflow-y:auto;padding:0 8px}
+.lb-row{display:flex;align-items:center;gap:18px;padding:16px 22px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);margin-bottom:10px;transition:opacity .5s ease,transform .5s ease}
 .lb-row:first-child{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)}
-.lb-place{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;min-width:36px}
-.lb-name{flex:1;font-size:16px;font-weight:700}
-.lb-pts{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--white)}
+.lb-place{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;min-width:50px}
+.lb-name{flex:1;font-size:24px;font-weight:700}
+.lb-pts{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--white)}
 .lb-continue{margin-top:24px;max-width:280px}
 .final-sub{font-size:15px;color:var(--dim);text-align:center;margin-bottom:28px}
-.podium{max-width:480px;width:100%;margin-bottom:32px;max-height:60vh;overflow-y:auto}
-.podium-row{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;margin-bottom:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
-.podium-rank{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;width:28px;text-align:center}
-.podium-name{flex:1;font-size:14px;font-weight:500}
-.podium-pts{font-family:'Syne',sans-serif;font-size:18px;font-weight:800}
+.podium{max-width:580px;width:100%;margin-bottom:32px;max-height:60vh;overflow-y:auto}
+.podium-row{display:flex;align-items:center;gap:16px;padding:18px 22px;border-radius:14px;margin-bottom:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.podium-rank{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;width:44px;text-align:center}
+.podium-name{flex:1;font-size:22px;font-weight:600}
+.podium-pts{font-family:'Syne',sans-serif;font-size:26px;font-weight:800}
 </style>
 </head>
 <body>
@@ -470,7 +472,7 @@ var BG_MUSIC_VOLUME = 0.35;
 var TIMER_SECONDS   = 30;
 
 var r1data = [
-  {q:'Санька с волосами видели за твоим лицом? Вот сейчас увидели!', a:'Аркадий Укупник', hint:'', img:'images/photo_4.jpg', imgAnswer:'images/ans_4.jpg'},
+  {q:'Санька с волосами видели? Вот сейчас увидели!', a:'Аркадий Укупник', hint:'', img:'images/photo_4.jpg', imgAnswer:'images/ans_4.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Джаред Лето', hint:'', img:'images/photo_1.jpg', imgAnswer:'images/ans_1.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Сидни Суини', hint:'', img:'images/photo_2.jpg', imgAnswer:'images/ans_2.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Дженифер Лоуренс', hint:'', img:'images/photo_5.jpg', imgAnswer:'images/ans_5.jpg'},
@@ -507,7 +509,7 @@ var r3data = [
   {q:'Какой вид выпечки у меня никогда не получался?', a:'Г', hint:'', voiceFile:'', options:['Багет','Морковный торт','Пирожки','Макаруны']},
   {q:'Какой год на фотографии', a:'Б', hint:'', voiceFile:'', options:['1990','1992','1994','1996'], img:'images/photo_11.jpg'},
   {q:'Любимый алкогольный напиток', a:'Г', hint:'', voiceFile:'', options:['Пиво','Водка','Игристое','Белое вино']},
-  {q:'Какой год на фотографии?', a:'В', hint:'', voiceFile:'', options:['2008','2010','2012','2014'], img:'images/photo_12.jpg'},
+  {q:'Какой год на фотографии?', a:'В', hint:'', voiceFile:'', options:['2008','2010','2012','2014'], img:'images/photo_11.jpg'},
   {q:'Что из этого вообще не мое?', a:'В', hint:'', voiceFile:'', options:['Велосипед','Вейкборд','Скейтборд','Сноуборд']},
 ];
 
@@ -547,11 +549,10 @@ function ablyConnect() {
       }
     });
 
-    // Запрос текущего вопроса при (пере)подключении капитана — шлём актуальный текст и опции
+    // Запрос текущего вопроса при (пере)подключении капитана —
+    // отвечаем ВСЕГДА: либо актуальным вопросом, либо явным "вопроса нет"
     sbChannel.on('broadcast', { event: 'request-current' }, function() {
-      if (currentQId) {
-        sbChannel.send({ type: 'broadcast', event: 'current-question', payload: currentQPayload });
-      }
+      sbChannel.send({ type: 'broadcast', event: 'current-question', payload: currentQId ? currentQPayload : null });
     });
 
     sbChannel.subscribe();
@@ -622,7 +623,6 @@ function normalizeAnswer(s) {
   return (s || '').toString().trim().toLowerCase().replace(/ё/g, 'е').replace(/[^\wа-яa-z0-9 ]/gi, '');
 }
 function levenshtein(a, b) {
-  a = normalizeAnswer(a); b = normalizeAnswer(b);
   if (a === b) return 0;
   var m = a.length, n = b.length;
   if (!m) return n;
@@ -637,14 +637,54 @@ function levenshtein(a, b) {
   }
   return dp[m][n];
 }
-// Допуск на опечатки: ~1 ошибка на каждые 6 символов правильного ответа, минимум 1
-function isCloseMatch(userAnswer, correctAnswer) {
-  var na = normalizeAnswer(userAnswer), nc = normalizeAnswer(correctAnswer);
-  if (!na || !nc) return false;
-  if (na === nc) return true;
-  var dist = levenshtein(na, nc);
-  var tolerance = Math.max(1, Math.floor(nc.length / 6));
+// Два слова считаем «совпадающими» если они равны или похожи с учётом опечаток
+function wordsMatch(w1, w2) {
+  if (!w1 || !w2) return false;
+  if (w1 === w2) return true;
+  var dist = levenshtein(w1, w2);
+  var tolerance = Math.max(1, Math.floor(Math.max(w1.length, w2.length) / 5));
   return dist <= tolerance;
+}
+
+/* ══ ПРОВЕРКА ОТВЕТОВ ══
+   Возвращает уровень совпадения:
+   'exact'   — точное совпадение всей строки (или всех слов, в любом порядке)
+   'partial' — совпало хотя бы одно значимое слово из нескольких (например только фамилия,
+               или верно назван исполнитель, но не песня)
+   'none'    — совпадений нет
+   Короткие служебные слова (предлоги, союзы) игнорируются при сравнении, чтобы не давать
+   ложных partial-совпадений на "и", "в", "на" и т.п. */
+var STOPWORDS = {'и':1,'в':1,'на':1,'с':1,'к':1,'у':1,'о':1,'из':1,'от':1,'за':1,'по':1,'the':1,'a':1,'an':1,'and':1,'of':1};
+
+function matchLevel(userAnswer, correctAnswer) {
+  var nu = normalizeAnswer(userAnswer), nc = normalizeAnswer(correctAnswer);
+  if (!nu || !nc) return 'none';
+  if (nu === nc) return 'exact';
+
+  var uWords = nu.split(/\s+/).filter(function(w){ return w && !STOPWORDS[w]; });
+  var cWords = nc.split(/\s+/).filter(function(w){ return w && !STOPWORDS[w]; });
+  if (!cWords.length) return 'none';
+
+  // Сколько слов правильного ответа нашлось среди слов пользователя (порядок не важен)
+  var matchedCount = 0;
+  var usedUserIdx = {};
+  cWords.forEach(function(cw) {
+    for (var i = 0; i < uWords.length; i++) {
+      if (usedUserIdx[i]) continue;
+      if (wordsMatch(uWords[i], cw)) { matchedCount++; usedUserIdx[i] = true; break; }
+    }
+  });
+
+  if (matchedCount === cWords.length) return 'exact';   // все слова на месте, порядок не важен
+  if (matchedCount > 0) return 'partial';                 // хотя бы одно слово (например, фамилия) совпало
+  return 'none';
+}
+
+// Обратная совместимость со старыми вызовами (true/false) — используется для UI-подсказок,
+// считаем true и для 'exact', и для 'partial', т.к. оба варианта стоит показать ведущему
+function isCloseMatch(userAnswer, correctAnswer) {
+  var lvl = matchLevel(userAnswer, correctAnswer);
+  return lvl === 'exact' || lvl === 'partial';
 }
 
 /* ══ TURN SYSTEM (R2) ══ */
@@ -658,6 +698,8 @@ function advanceTurn() { r2TurnIndex++; }
 var answersOrder = [];
 
 // Показываем только тех кто ОТВЕТИЛ (для 25 человек список «ждём» был бы бесконечным)
+// Раунд 2 (музыкальная доска): без автопроверки — ведущий сам слышит правильный
+// ответ на слух (название трека/исполнителя) и решает, кому начислять баллы.
 function updateLiveAnswers() {
   var mg = document.getElementById('modal-live-grid');
   if (!mg) return;
@@ -670,17 +712,15 @@ function updateLiveAnswers() {
   }
   mg.innerHTML = top10.map(function(a, idx) {
     var posLabel = ['🥇','🥈','🥉'][idx] || ('#' + (idx + 1));
-    var autoCorrect = currentCorrectAnswer && isCloseMatch(a.answer, currentCorrectAnswer);
     return '<div class="mlive-box has' + (a.edited ? ' edited' : '') + '">' +
       '<div class="mlive-name" style="color:' + colorFor(a.id) + '">' + posLabel + ' ' + a.name + (a.edited ? ' ✏️' : '') + '</div>' +
-      '<div class="mlive-ans">' + a.answer + (autoCorrect ? ' ✅' : '') + '</div>' +
+      '<div class="mlive-ans">' + a.answer + '</div>' +
       '<button class="mlive-award" onclick="awardTilePoints(\'' + a.id + '\')" id="award-' + a.id + '">+ ' + curTilePts + ' балл</button>' +
       '</div>';
   }).join('') + (extra > 0 ? '<div class="mlive-extra">+ ещё ' + extra + ' ответили позже</div>' : '');
 }
 
 var curTilePts = 1; // множитель текущей плитки
-var currentCorrectAnswer = ''; // для подсветки автосовпадений в live-листе
 function awardTilePoints(id) {
   changeScore(id, curTilePts, 2);
   var btn = document.getElementById('award-' + id);
@@ -893,15 +933,43 @@ function showAnswerScreen(qId, aId) {
   var next = document.getElementById('screen-' + aId);
   if (next) next.classList.add('active');
   renderAnsParticipants(aId);
+  autoAwardExactMatches(aId);
 }
 
-// Рендерим список участников динамически — кто ответил идёт первым (отсортирован по похожести),
-// кто не ответил — внизу приглушённым списком
+// Автоматически начисляет баллы всем, чей ответ распознан как ТОЧНОЕ совпадение
+// (раунд 1 — после проверки через Левенштейна, раунд 3 — точное совпадение буквы).
+// Срабатывает один раз при открытии экрана ответа. Ведущему остаётся вручную доотметить
+// тех, кто опечатался сильнее допуска или дал частичный ответ — кнопкой "Начислить".
+function autoAwardExactMatches(aId) {
+  var screenEl = document.getElementById('screen-' + aId);
+  if (screenEl.dataset.autoAwarded === '1') return; // уже начисляли — не дублируем при повторном входе
+  var round = screenEl.dataset.round;
+  var awardedAny = false;
+  document.querySelectorAll('#ans-participants-' + aId + ' .auto-marked').forEach(function(row) {
+    var id = row.id.replace('atr-' + aId + '-', '');
+    changeScore(id, 1, round);
+    row.classList.remove('correct', 'auto-marked');
+    row.classList.add('was-awarded');
+    awardedAny = true;
+  });
+  if (awardedAny) {
+    screenEl.dataset.autoAwarded = '1';
+    var note = document.querySelector('#screen-' + aId + ' .apply-note');
+    if (note) note.textContent = '✅ Баллы за точные ответы начислены автоматически. Отметь вручную тех, кто ответил верно но с опечаткой.';
+  }
+}
+
+// Рендерим список участников динамически — кто ответил идёт первым (точные совпадения
+// автоматически отмечены галочкой, частичные подсвечены отдельно и требуют решения ведущего),
+// кто не ответил — внизу приглушённым списком.
+// Раунд 1 — гибкое сравнение (Левенштейн, порядок слов не важен, частичные совпадения).
+// Раунд 3 — точное совпадение буквы ответа (без вариантов — точное совпадение текста).
 function renderAnsParticipants(aId) {
   var container = document.getElementById('ans-participants-' + aId);
   if (!container) return;
   var screenEl = document.getElementById('screen-' + aId);
   var correctAnswer = screenEl ? screenEl.dataset.correct : '';
+  var round = screenEl ? parseInt(screenEl.dataset.round) : 1;
 
   var answered = [];
   var notAnswered = [];
@@ -911,21 +979,31 @@ function renderAnsParticipants(aId) {
     if (la) answered.push({ id: id, name: p.name, answer: la.answer, edited: la.edited });
     else notAnswered.push({ id: id, name: p.name });
   });
-  // Похожие на правильный ответ — наверх
-  answered.sort(function(a, b) {
-    var ac = isCloseMatch(a.answer, correctAnswer) ? 1 : 0;
-    var bc = isCloseMatch(b.answer, correctAnswer) ? 1 : 0;
-    return bc - ac;
+
+  // Считаем уровень совпадения в зависимости от раунда
+  answered.forEach(function(a) {
+    if (round === 1) {
+      a.level = matchLevel(a.answer, correctAnswer);
+    } else {
+      // Раунд 3: точное совпадение буквы/текста ответа, без допуска на опечатки
+      a.level = normalizeAnswer(a.answer) === normalizeAnswer(correctAnswer) ? 'exact' : 'none';
+    }
   });
+  var levelRank = { exact: 2, partial: 1, none: 0 };
+  answered.sort(function(a, b) { return levelRank[b.level] - levelRank[a.level]; });
 
   var html = '';
   if (answered.length) {
     html += answered.map(function(a) {
-      var auto = isCloseMatch(a.answer, correctAnswer);
-      return '<div class="ans-team-row' + (auto ? ' suggest-correct' : '') + '" id="atr-' + aId + '-' + a.id + '" onclick="toggleParticipant(\'' + aId + '\',\'' + a.id + '\')">' +
+      var tagHtml = a.level === 'exact' ? ' <span class="auto-tag">✓ верно</span>'
+        : a.level === 'partial' ? ' <span class="auto-tag partial-tag">частично похоже</span>' : '';
+      // exact-совпадения сразу отмечаем как "correct" — баллы за них будут начислены
+      // автоматически кнопкой "Начислить" без необходимости кликать по каждому вручную
+      var rowClass = a.level === 'exact' ? ' suggest-correct correct auto-marked' : a.level === 'partial' ? ' partial-match' : '';
+      return '<div class="ans-team-row' + rowClass + '" id="atr-' + aId + '-' + a.id + '" onclick="toggleParticipant(\'' + aId + '\',\'' + a.id + '\')">' +
         '<div class="ans-chk"></div>' +
         '<div class="ans-team-info">' +
-          '<div class="ans-team-name" style="color:' + colorFor(a.id) + '">' + a.name + (auto ? ' <span class="auto-tag">похоже верно</span>' : '') + '</div>' +
+          '<div class="ans-team-name" style="color:' + colorFor(a.id) + '">' + a.name + tagHtml + '</div>' +
           '<div class="ans-team-answer">' + a.answer + '</div>' +
         '</div></div>';
     }).join('');

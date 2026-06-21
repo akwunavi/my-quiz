@@ -107,7 +107,6 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
         oninput="checkAns()" onkeydown="if(event.key==='Enter'){event.preventDefault();sendAnswer()}">
       <button class="send-btn off" id="send-btn" onclick="sendAnswer()">Отправить ответ</button>
     </div>
-    <div style="text-align:center"><span class="small-link" onclick="backToTeams()">← Сменить команду</span></div>
   </div>
 
   <div id="state-sent" style="display:none;width:100%">
@@ -118,7 +117,6 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
       <p id="edit-hint" style="font-size:12px;color:var(--dim);margin-top:10px">Можно изменить ответ ниже ⤵</p>
     </div>
     <div id="edit-area" style="width:100%"></div>
-    <div style="text-align:center"><span class="small-link" onclick="backToTeams()">← Сменить имя</span></div>
   </div>
 </div>
 
@@ -206,16 +204,21 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 /* ── SUPABASE ── */
+var reconnectAttempt = 0;
+var lastKnownQId = null;
+
 function connect() {
   try {
+    if (ch) { try { sb.removeChannel(ch); } catch(e){} }
     sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     ch = sb.channel(CHANNEL, { config: { broadcast: { self: false } } });
 
     ch.on('broadcast', { event: 'question-open' }, function(payload){
-      currentQ = payload.payload; hasSent = false; showQ(payload.payload.text, payload.payload.options);
+      currentQ = payload.payload; lastKnownQId = payload.payload.id;
+      hasSent = false; showQ(payload.payload.text, payload.payload.options);
     });
     ch.on('broadcast', { event: 'question-close' }, function(){
-      currentQ = null; showWait();
+      currentQ = null; lastKnownQId = null; showWait();
     });
     ch.on('broadcast', { event: 'answers-locked' }, function(){
       var hint = document.getElementById('edit-hint');
@@ -224,25 +227,65 @@ function connect() {
       if (area) area.innerHTML = '';
     });
     ch.on('broadcast', { event: 'current-question' }, function(payload){
-      if (payload.payload && !currentQ) { 
-        currentQ = payload.payload; 
-        if (!hasSent) showQ(payload.payload.text, payload.payload.options); 
+      if (payload.payload) {
+        currentQ = payload.payload; lastKnownQId = payload.payload.id;
+        if (!hasSent) showQ(payload.payload.text, payload.payload.options);
+      } else if (!payload.payload && currentQ) {
+        // ведущий ответил что вопроса сейчас нет, а у нас остался старый — сбрасываем
+        currentQ = null; lastKnownQId = null; showWait();
       }
     });
 
     ch.subscribe(function(status){
       if (status === 'SUBSCRIBED') {
+        reconnectAttempt = 0;
         document.getElementById('conn').className = 'conn ok';
         ch.send({ type: 'broadcast', event: 'participant-join', payload: { id: myId, name: myName } });
-        setTimeout(function(){
-          ch.send({ type: 'broadcast', event: 'request-current', payload: { id: myId } });
-        }, 800);
+        requestCurrentQuestion();
       } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
         document.getElementById('conn').className = 'conn err';
+        scheduleReconnect();
       }
     });
-  } catch(e) { showToast('Ошибка подключения', true); document.getElementById('conn').className = 'conn err'; }
+  } catch(e) { showToast('Ошибка подключения', true); document.getElementById('conn').className = 'conn err'; scheduleReconnect(); }
 }
+
+function requestCurrentQuestion() {
+  setTimeout(function(){
+    if (ch) ch.send({ type: 'broadcast', event: 'request-current', payload: { id: myId } });
+  }, 800);
+}
+
+// Переподключение с нарастающей паузой (1с, 2с, 4с... максимум 8с)
+function scheduleReconnect() {
+  reconnectAttempt++;
+  var delay = Math.min(8000, 1000 * Math.pow(2, reconnectAttempt - 1));
+  setTimeout(function(){
+    if (myId) connect();
+  }, delay);
+}
+
+// Телефон "засыпает" когда экран блокируется или приложение уходит в фон —
+// WebSocket-соединение Supabase может оборваться без события. При возврате
+// на вкладку всегда принудительно переподключаемся и спрашиваем актуальный вопрос.
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && myId) {
+    connect();
+  }
+});
+window.addEventListener('online', function() {
+  if (myId) connect();
+});
+
+// Дополнительная подстраховка: раз в 20 секунд тихо проверяем что канал жив,
+// и если статус не «joined» — переподключаемся сами, без участия пользователя.
+setInterval(function() {
+  if (!myId || !ch) return;
+  var state = ch.state; // 'joined' | 'closed' | 'errored' | 'joining' | 'leaving'
+  if (state && state !== 'joined' && state !== 'joining') {
+    connect();
+  }
+}, 20000);
 
 /* ── STATES ── */
 function showWait() {
