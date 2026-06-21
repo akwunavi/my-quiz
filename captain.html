@@ -78,23 +78,12 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 <div class="bg"></div>
 <div class="conn" id="conn"></div>
 
-<!-- ШАГ 1: выбор команды -->
-<div class="page active" id="pg-team">
+<!-- ШАГ 1: вход — ввод имени -->
+<div class="page active" id="pg-name">
   <p class="eye">🎂 Quiz Night</p>
   <h1 class="big">Привет!</h1>
-  <p class="sub">Выбери свою команду</p>
-  <button class="ts-btn" onclick="pickTeam(0)"><div class="ts-dot" style="background:var(--gold)"></div><span id="tn-0">Команда 1</span></button>
-  <button class="ts-btn" onclick="pickTeam(1)"><div class="ts-dot" style="background:var(--mint)"></div><span id="tn-1">Команда 2</span></button>
-  <button class="ts-btn" onclick="pickTeam(2)"><div class="ts-dot" style="background:var(--purple)"></div><span id="tn-2">Команда 3</span></button>
-</div>
-
-<!-- ШАГ 2: ввод названия команды -->
-<div class="page" id="pg-name">
-  <p class="eye">🎂 Quiz Night</p>
-  <div class="name-badge" id="name-badge"></div>
-  <h2 class="big">Как называется<br>ваша команда?</h2>
-  <p class="name-hint">Придумайте крутое название 👇</p>
-  <input class="name-input" id="name-input" placeholder="Введите название..." maxlength="20"
+  <p class="sub">Как тебя зовут?</p>
+  <input class="name-input" id="name-input" placeholder="Введи имя..." maxlength="20" autocomplete="off" autocorrect="off"
     oninput="checkName()" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmName()}">
   <button class="btn btn-primary" id="name-btn" style="opacity:.4;pointer-events:none" onclick="confirmName()">Готово →</button>
 </div>
@@ -125,9 +114,11 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
     <div class="sent-box">
       <div class="sent-icon">✅</div>
       <div class="sent-title">Отправлено!</div>
-      <div class="sent-ans">Ваш ответ: <span id="sent-text"></span></div>
+      <div class="sent-ans">Твой ответ: <span id="sent-text"></span></div>
+      <p id="edit-hint" style="font-size:12px;color:var(--dim);margin-top:10px">Можно изменить ответ ниже ⤵</p>
     </div>
-    <div style="text-align:center"><span class="small-link" onclick="backToTeams()">← Сменить команду</span></div>
+    <div id="edit-area" style="width:100%"></div>
+    <div style="text-align:center"><span class="small-link" onclick="backToTeams()">← Сменить имя</span></div>
   </div>
 </div>
 
@@ -142,30 +133,40 @@ var COLORS   = ['var(--gold)','var(--mint)','var(--purple)'];
 var BORDERS  = ['rgba(245,158,11,.4)','rgba(16,245,160,.4)','rgba(139,92,246,.4)'];
 var EMOJIS   = ['🥇','🥈','🥉'];
 
-var myTeam = null, myName = '', myTeamName = '';
-var currentQ = null, hasSent = false;
+var myId = '', myName = '';
+var currentQ = null, hasSent = false, lastSentAnswer = '';
 var sb, ch;
+var STORAGE_KEY = 'quiz_participant';
 
 /* ── PAGES ── */
 function showPage(id) {
-  ['pg-team','pg-name','pg-answer'].forEach(function(p){
+  ['pg-name','pg-answer'].forEach(function(p){
     document.getElementById(p).classList.toggle('active', p === id);
   });
 }
 
-/* ── STEP 1: pick team ── */
-function pickTeam(idx) {
-  myTeam = idx;
-  myTeamName = document.getElementById('tn-' + idx).textContent;
-  var badge = document.getElementById('name-badge');
-  badge.style.color = COLORS[idx];
-  badge.style.borderColor = BORDERS[idx];
-  badge.innerHTML = EMOJIS[idx] + ' ' + myTeamName;
-  showPage('pg-name');
-  setTimeout(function(){ document.getElementById('name-input').focus(); }, 300);
+/* ── ID generation & persistence ── */
+function getOrCreateId() {
+  var saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      var data = JSON.parse(saved);
+      return data;
+    } catch(e) {}
+  }
+  return null;
+}
+function saveParticipant(id, name) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ id: id, name: name }));
+}
+function clearParticipant() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+function genId() {
+  return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
 }
 
-/* ── STEP 2: team name ── */
+/* ── STEP 1: name entry ── */
 function checkName() {
   var v = document.getElementById('name-input').value.trim();
   var btn = document.getElementById('name-btn');
@@ -176,22 +177,33 @@ function confirmName() {
   var v = document.getElementById('name-input').value.trim();
   if (!v) return;
   myName = v;
-  // обновляем бейдж в ответах
-  var ab = document.getElementById('ans-badge');
-  ab.style.borderColor = BORDERS[myTeam];
-  ab.style.color = COLORS[myTeam];
-  ab.innerHTML = '<span style="font-size:18px">' + EMOJIS[myTeam] + '</span> ' + myName;
+  myId = genId();
+  saveParticipant(myId, myName);
+  enterGame();
+}
+function enterGame() {
   showPage('pg-answer');
   connect();
 }
 
-/* ── BACK ── */
+/* ── BACK / reset identity ── */
 function backToTeams() {
-  myTeam = null; myName = ''; currentQ = null; hasSent = false;
+  myId = ''; myName = ''; currentQ = null; hasSent = false;
   document.getElementById('name-input').value = '';
-  showPage('pg-team');
+  clearParticipant();
+  showPage('pg-name');
   if (sb && ch) sb.removeChannel(ch);
 }
+
+/* ── Auto-resume on load ── */
+window.addEventListener('DOMContentLoaded', function() {
+  var saved = getOrCreateId();
+  if (saved && saved.id && saved.name) {
+    myId = saved.id;
+    myName = saved.name;
+    enterGame();
+  }
+});
 
 /* ── SUPABASE ── */
 function connect() {
@@ -205,16 +217,26 @@ function connect() {
     ch.on('broadcast', { event: 'question-close' }, function(){
       currentQ = null; showWait();
     });
+    ch.on('broadcast', { event: 'answers-locked' }, function(){
+      var hint = document.getElementById('edit-hint');
+      var area = document.getElementById('edit-area');
+      if (hint) hint.textContent = 'Время на изменение ответа истекло';
+      if (area) area.innerHTML = '';
+    });
     ch.on('broadcast', { event: 'current-question' }, function(payload){
-      if (payload.payload && !currentQ) { currentQ = payload.payload; if (!hasSent) showQ(payload.payload.text); }
+      if (payload.payload && !currentQ) { 
+        currentQ = payload.payload; 
+        if (!hasSent) showQ(payload.payload.text, payload.payload.options); 
+      }
     });
 
     ch.subscribe(function(status){
       if (status === 'SUBSCRIBED') {
         document.getElementById('conn').className = 'conn ok';
-        // публикуем название команды
-        ch.send({ type: 'broadcast', event: 'team-name-update', payload: { team: myTeam, name: myName } });
-        ch.send({ type: 'broadcast', event: 'request-current', payload: { team: myTeam } });
+        ch.send({ type: 'broadcast', event: 'participant-join', payload: { id: myId, name: myName } });
+        setTimeout(function(){
+          ch.send({ type: 'broadcast', event: 'request-current', payload: { id: myId } });
+        }, 800);
       } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
         document.getElementById('conn').className = 'conn err';
       }
@@ -261,6 +283,29 @@ function showSent(ans) {
   document.getElementById('state-input').style.display = 'none';
   document.getElementById('state-sent').style.display = 'block';
   document.getElementById('sent-text').textContent = ans;
+  renderEditArea();
+}
+
+/* ── EDIT WINDOW ──
+   Окно редактирования открыто пока currentQ активен (т.е. до question-close,
+   который ведущий шлёт через TIMER_SECONDS + 5 сек после старта таймера) */
+function renderEditArea() {
+  var area = document.getElementById('edit-area');
+  var hint = document.getElementById('edit-hint');
+  if (!currentQ) { area.innerHTML = ''; hint.style.display = 'none'; return; }
+  hint.style.display = 'block';
+  if (currentQ.options && currentQ.options.length) {
+    var letters = ['А','Б','В','Г'];
+    area.innerHTML = '<div class="cap-options" style="margin-top:10px">' +
+      currentQ.options.map(function(opt, i) {
+        var l = letters[i] || (i+1);
+        return '<button class="cap-opt-btn" onclick="sendOptionAnswer(\'' + l + '\')">' + l + '. ' + opt + '</button>';
+      }).join('') + '</div>';
+  } else {
+    area.innerHTML =
+      '<input class="ans-input" id="edit-input" placeholder="Новый ответ..." autocomplete="off" autocorrect="off" spellcheck="false" value="' + (lastSentAnswer || '').replace(/"/g,'&quot;') + '">' +
+      '<button class="send-btn ready" onclick="sendAnswer(true)">Изменить ответ</button>';
+  }
 }
 
 /* ── SEND ── */
@@ -270,16 +315,19 @@ function checkAns() {
   btn.className = 'send-btn ' + (v ? 'ready' : 'off');
 }
 function sendOptionAnswer(letter) {
-  if (hasSent || myTeam === null) return;
-  ch.send({ type: 'broadcast', event: 'answer', payload: { team: myTeam, teamName: myName, answer: letter, questionId: currentQ && currentQ.id } })
-    .then(function(){ hasSent = true; showSent(letter); showToast('✅ Ответ отправлен!'); })
+  if (!myId) return;
+  lastSentAnswer = letter;
+  ch.send({ type: 'broadcast', event: 'answer', payload: { id: myId, name: myName, answer: letter, questionId: currentQ && currentQ.id } })
+    .then(function(){ hasSent = true; showSent(letter); showToast(hasSent ? '✅ Ответ обновлён!' : '✅ Ответ отправлен!'); })
     .catch(function(){ showToast('❌ Ошибка отправки', true); });
 }
-function sendAnswer() {
-  var v = document.getElementById('ans-input').value.trim();
-  if (!v || myTeam === null) return;
-  ch.send({ type: 'broadcast', event: 'answer', payload: { team: myTeam, teamName: myName, answer: v, questionId: currentQ && currentQ.id } })
-    .then(function(){ hasSent = true; showSent(v); showToast('✅ Ответ отправлен!'); })
+function sendAnswer(isEdit) {
+  var inputId = isEdit ? 'edit-input' : 'ans-input';
+  var v = document.getElementById(inputId).value.trim();
+  if (!v || !myId) return;
+  lastSentAnswer = v;
+  ch.send({ type: 'broadcast', event: 'answer', payload: { id: myId, name: myName, answer: v, questionId: currentQ && currentQ.id } })
+    .then(function(){ hasSent = true; showSent(v); showToast(isEdit ? '✅ Ответ обновлён!' : '✅ Ответ отправлен!'); })
     .catch(function(){ showToast('❌ Ошибка отправки', true); });
 }
 

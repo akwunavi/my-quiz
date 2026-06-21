@@ -117,16 +117,23 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 .ans-label-top{font-size:10px;font-weight:500;letter-spacing:4px;text-transform:uppercase;color:var(--mint)}
 .ans-correct-text{font-family:'Syne',sans-serif;font-size:clamp(22px,3vw,40px);font-weight:800;line-height:1.15;color:var(--white)}
 
-.ans-team-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);cursor:pointer;transition:all .25s;user-select:none}
+.ans-participants{max-height:46vh;overflow-y:auto;padding-right:4px}
+.ans-team-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);cursor:pointer;transition:all .25s;user-select:none;margin-bottom:7px}
 .ans-team-row:hover{background:rgba(255,255,255,.07)}
 .ans-team-row.correct{border-color:rgba(16,245,160,.5);background:rgba(16,245,160,.1)}
 .ans-team-row.correct .ans-chk{background:var(--mint);border-color:var(--mint)}
 .ans-team-row.correct .ans-chk::after{opacity:1}
+.ans-team-row.suggest-correct{border-color:rgba(16,245,160,.3)}
+.ans-team-row.was-awarded{opacity:.5}
+.ans-team-row.dim-row{opacity:.45;padding:7px 14px}
+.ans-team-row.dim-row .ans-chk{width:16px;height:16px}
+.ans-noanswer-label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin:14px 0 6px;padding-left:4px}
+.auto-tag{font-size:10px;color:var(--mint);font-weight:600;background:rgba(16,245,160,.12);padding:2px 8px;border-radius:100px;margin-left:6px;vertical-align:middle}
 .ans-chk{width:22px;height:22px;border-radius:7px;border:2px solid rgba(255,255,255,.2);background:transparent;flex-shrink:0;position:relative;transition:all .2s}
 .ans-chk::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;font-weight:800;color:#07071a;opacity:0;transition:opacity .2s}
-.ans-team-info{flex:1}
+.ans-team-info{flex:1;min-width:0}
 .ans-team-name{font-size:14px;font-weight:700}
-.ans-team-answer{font-size:12px;color:var(--dim);margin-top:2px;font-style:italic}
+.ans-team-answer{font-size:12px;color:var(--dim);margin-top:2px;font-style:italic;word-break:break-word}
 
 .apply-btn{padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--mint),#059669);color:#07071a;font-size:15px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s}
 .apply-btn:hover{opacity:.85;transform:translateY(-1px)}
@@ -201,9 +208,9 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 .board-hdr-eye{font-size:11px;font-weight:500;letter-spacing:4px;text-transform:uppercase;color:var(--mint);margin-bottom:5px}
 .board-hdr-title{font-family:'Syne',sans-serif;font-size:clamp(20px,4vw,34px);font-weight:800}
 .board-hdr-sub{font-size:12px;color:var(--dim);margin-top:3px}
-.jgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;max-width:820px}
-.cat-hdr{background:rgba(16,245,160,.10);border:1px solid rgba(16,245,160,.22);border-radius:10px;padding:10px 5px;text-align:center;font-family:'Syne',sans-serif;font-size:clamp(9px,1.2vw,12px);font-weight:700;color:var(--mint);min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.3}
-.tile{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:10px;min-height:68px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.jgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:100%;max-width:100%}
+.cat-hdr{background:rgba(16,245,160,.10);border:1px solid rgba(16,245,160,.22);border-radius:12px;padding:14px 8px;text-align:center;font-family:'Syne',sans-serif;font-size:clamp(10px,1.4vw,14px);font-weight:700;color:var(--mint);min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.3}
+.tile{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:12px;min-height:90px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
 .tile::before{content:'';position:absolute;inset:0;border-radius:10px;background:linear-gradient(135deg,rgba(16,245,160,.10) 0%,transparent 60%);opacity:0;transition:opacity .2s}
 .tile:hover{transform:translateY(-3px);border-color:rgba(16,245,160,.4);box-shadow:0 8px 20px rgba(16,245,160,.15)}
 .tile:hover::before{opacity:1}
@@ -221,8 +228,12 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 .overlay.open{opacity:1;pointer-events:auto}
 .overlay.open *{pointer-events:auto}
 .overlay.open{opacity:1;pointer-events:auto}
-.modal{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:36px 28px;max-width:620px;width:100%;text-align:center;box-shadow:0 0 0 1px rgba(16,245,160,.1),0 40px 100px rgba(0,0,0,.6);position:relative;transform:scale(.95);transition:transform .3s;max-height:88vh;overflow-y:auto}
+.modal{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:40px 36px;max-width:820px;width:100%;text-align:center;box-shadow:0 0 0 1px rgba(16,245,160,.1),0 40px 100px rgba(0,0,0,.6);position:relative;transform:scale(.95);transition:transform .3s;max-height:92vh;overflow-y:auto}
 .overlay.open .modal{transform:scale(1)}
+.modal-2col{max-width:980px;display:grid;grid-template-columns:1fr 280px;gap:28px;text-align:left;align-items:start}
+.modal-main{text-align:center;min-width:0}
+.modal-side{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;max-height:560px;overflow-y:auto;align-self:stretch}
+@media (max-width:760px){.modal-2col{grid-template-columns:1fr}.modal-side{max-height:240px}}
 .modal-cat{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--mint);font-weight:500;margin-bottom:4px}
 .modal-pts{font-family:'Syne',sans-serif;font-size:44px;font-weight:800;line-height:1;margin-bottom:12px}
 .modal-q{font-family:'Syne',sans-serif;font-size:clamp(15px,2.3vw,22px);font-weight:700;line-height:1.3;margin-bottom:14px}
@@ -245,8 +256,11 @@ audio.hidden-audio{display:none}
 .turn-text b{font-size:15px}
 
 .modal-live-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
-.modal-live-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
-.mlive-box{border-radius:9px;padding:9px 6px;text-align:center;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .3s}
+.modal-live-grid{display:flex;flex-direction:column;gap:0;margin-bottom:0}
+.mlive-box{border-radius:9px;padding:9px 6px;text-align:left;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);min-height:50px;display:flex;flex-direction:column;justify-content:center;gap:3px;transition:all .3s;margin-bottom:8px}
+.mlive-extra{text-align:center;font-size:11px;color:var(--dim);padding:8px 0}
+.mlive-empty{text-align:center;font-size:13px;color:var(--dim);padding:24px 0}
+.mlive-box.edited{border-color:rgba(245,158,11,.4)}
 .mlive-box.has{border-color:rgba(16,245,160,.3);background:rgba(16,245,160,.07)}
 .mlive-box.blurred{opacity:.25;filter:blur(2px)}
 .mlive-name{font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:600}
@@ -266,8 +280,19 @@ audio.hidden-audio{display:none}
 .final-emoji{font-size:64px;margin-bottom:18px;animation:bounce 1s ease infinite alternate}
 @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-10px)}}
 .final-title{font-family:'Syne',sans-serif;font-size:clamp(32px,6vw,68px);font-weight:800;background:linear-gradient(90deg,var(--gold),var(--purple),var(--mint));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:10px}
+
+/* LEADERBOARD (титры) */
+.lb-eye{font-size:12px;letter-spacing:4px;color:var(--mint);font-weight:600;margin-bottom:10px;text-align:center}
+.lb-title{font-family:'Syne',sans-serif;font-size:clamp(26px,4vw,46px);font-weight:800;text-align:center;margin-bottom:28px}
+.lb-list{width:100%;max-width:560px;max-height:60vh;overflow-y:auto;padding:0 8px}
+.lb-row{display:flex;align-items:center;gap:14px;padding:12px 18px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);margin-bottom:8px;transition:opacity .5s ease,transform .5s ease}
+.lb-row:first-child{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)}
+.lb-place{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;min-width:36px}
+.lb-name{flex:1;font-size:16px;font-weight:700}
+.lb-pts{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--white)}
+.lb-continue{margin-top:24px;max-width:280px}
 .final-sub{font-size:15px;color:var(--dim);text-align:center;margin-bottom:28px}
-.podium{max-width:480px;width:100%;margin-bottom:32px}
+.podium{max-width:480px;width:100%;margin-bottom:32px;max-height:60vh;overflow-y:auto}
 .podium-row{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;margin-bottom:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
 .podium-rank{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;width:28px;text-align:center}
 .podium-name{flex:1;font-size:14px;font-weight:500}
@@ -291,9 +316,9 @@ audio.hidden-audio{display:none}
 
 <!-- INTRO -->
 <div class="screen centered active" id="screen-intro">
-  <p class="eyebrow">🎂 День рождения · Ivan Quiz Party</p>
-  <h1 class="display">IVAN<br>QUIZ<br>TIME</h1>
-  <p class="subtitle">Три раунда. Отдыхаем. Веселимся!</p>
+  <p class="eyebrow">🎂 День рождения · Quiz Night</p>
+  <h1 class="display">QUIZ<br>TIME</h1>
+  <p class="subtitle">Три раунда. Один победитель. Много смеха.</p>
   <div class="rounds-preview">
     <div class="round-pill">🖼️ Раунд 1 — Картинки</div>
     <div class="round-pill">🎵 Раунд 2 — Музыка</div>
@@ -302,7 +327,7 @@ audio.hidden-audio{display:none}
   <div class="btn-row">
     <button class="btn btn-secondary" onclick="goTo('randomizer')">👥 Команды</button>
     <button class="btn btn-secondary" onclick="goTo('qr')">📱 QR-код</button>
-    <button class="btn btn-gold" onclick="startQuiz()">Погнали! ✨</button>
+    <button class="btn btn-gold" onclick="startQuiz()">Поехали ✨</button>
   </div>
 </div>
 
@@ -310,7 +335,7 @@ audio.hidden-audio{display:none}
 <div class="screen centered" id="screen-qr">
   <p class="eyebrow">📱 Подключение капитанов</p>
   <h2 class="qr-big">Отсканируй QR-код</h2>
-  <p class="qr-sub">Выбирайте капитана. Каждый кэп сканирует со своего телефона</p>
+  <p class="qr-sub">Каждый капитан сканирует со своего телефона</p>
   <div class="qr-wrap"><img id="qr-img" src="" alt="QR" width="200" height="200"></div>
   <p class="qr-url" id="qr-url-text"></p>
   <div class="qr-teams" id="qr-teams"></div>
@@ -323,25 +348,21 @@ audio.hidden-audio{display:none}
 <!-- RANDOMIZER -->
 <div class="screen centered" id="screen-randomizer">
   <h2 class="rand-title">👥 Команды</h2>
-  <p class="rand-sub">Введи имена и раздели по командам</p>
-  <div class="rand-input-wrap">
-    <input class="rand-input" id="rand-input" placeholder="Имя → Enter" onkeydown="randAddName(event)">
-    <button class="btn btn-primary" style="padding:13px 18px" onclick="randAddName({key:'Enter'})">+</button>
-  </div>
+  <p class="rand-sub">Случайно разделить уже подключившихся участников по командам</p>
+  <p style="font-size:13px;color:var(--dim);margin-bottom:16px" id="rand-connected-count">Подключено: 0 участников</p>
   <div class="rand-num">
     <span>Команд:</span>
     <button class="rand-num-btn active" onclick="setTeams(2,this)">2</button>
     <button class="rand-num-btn" onclick="setTeams(3,this)">3</button>
+    <button class="rand-num-btn" onclick="setTeams(4,this)">4</button>
+    <button class="rand-num-btn" onclick="setTeams(5,this)">5</button>
   </div>
-  <div class="names-list" id="names-list"></div>
-  <div class="btn-row" style="margin-bottom:16px">
+  <div class="btn-row" style="margin-bottom:16px;margin-top:16px">
     <button class="btn btn-mint" onclick="doShuffle()">🎲 Перемешать!</button>
-    <button class="btn btn-secondary" onclick="clearNames()">Очистить</button>
   </div>
   <div class="teams-result" id="teams-result" style="display:none"></div>
   <div class="btn-row" style="margin-top:10px">
     <button class="btn btn-secondary" onclick="goTo('intro')">← Назад</button>
-    <button class="btn btn-primary" id="rand-start-btn" style="display:none" onclick="applyTeamsAndStart()">Начать квиз ✨</button>
   </div>
 </div>
 
@@ -351,7 +372,7 @@ audio.hidden-audio{display:none}
   <p class="round-badge">🖼️ Раунд первый</p>
   <div class="line" style="color:var(--gold)"></div>
   <h2 class="round-title">КАР-<br>ТИН-<br>КИ</h2>
-  <p class="round-desc">Угадай кто из знаменитостей скрыт за лицом одного из гостей. Каждый правильный ответ — 1 балл.</p>
+  <p class="round-desc">Угадай кто или что на фото. Каждый правильный ответ — 1 балл.</p>
   <button class="btn btn-gold" onclick="goTo('r1-q1')">Начать раунд →</button>
 </div>
 <div id="r1-questions"></div>
@@ -363,49 +384,60 @@ audio.hidden-audio{display:none}
   <p class="round-badge">🎵 Раунд второй</p>
   <div class="line" style="color:var(--mint)"></div>
   <h2 class="round-title">МУ-<br>ЗЫ-<br>КА</h2>
-  <p class="round-desc">Своя игра — выбирай тему и сложность. Отвечаем на скорость! Кто быстрее того и баллы. Первым плитку выбирает команда на 3 месте, далее - кто угадал первым предыдущий трек.</p>
+  <p class="round-desc">Своя игра — выбирай тему и сложность. Отвечают по очереди.</p>
   <button class="btn btn-mint" onclick="goTo('r2-board')">Открыть доску →</button>
 </div>
 
 <!-- R2 BOARD -->
-<div class="screen centered r2" id="screen-r2-board">
+<div class="screen r2" id="screen-r2-board" style="flex-direction:column;padding:70px 24px 24px;overflow-y:auto">
   <div class="board-hdr">
     <p class="board-hdr-eye">🎵 Раунд 2 — Музыкальная своя игра</p>
-    <h2 class="board-hdr-title">Выберите тему и ставку</h2>
-    <p class="board-hdr-sub">×0.5 · ×1 · ×1.5 · ×2 · выберите плитку</p>
+    <h2 class="board-hdr-title">Выбери тему и ставку</h2>
+    <p class="board-hdr-sub">×0.5 · ×1 · ×1.5 · ×2 · нажми на плитку</p>
   </div>
   <div class="jgrid" id="board-grid"></div>
   <div class="btn-row" style="margin-top:18px;position:sticky;bottom:0;padding:12px 0;background:rgba(7,7,26,.95)">
     <button class="btn btn-secondary" onclick="goTo('r2-intro')">← Назад</button>
-    <button class="btn btn-mint" onclick="closeQuestion();goTo('r3-intro')">Раунд 3 →</button>
+    <button class="btn btn-mint" onclick="closeQuestion();showLeaderboard('r3-intro')">Раунд 3 →</button>
   </div>
+</div>
+
+<!-- LEADERBOARD (титры между раундами) -->
+<div class="screen centered" id="screen-leaderboard">
+  <p class="lb-eye" id="lb-eye">📊 ПРОМЕЖУТОЧНЫЕ ИТОГИ</p>
+  <h2 class="lb-title">Турнирная<br>таблица</h2>
+  <div class="lb-list" id="lb-list"></div>
+  <button class="btn btn-primary lb-continue" id="lb-continue-btn" style="display:none" onclick="finishLeaderboard()">Продолжить →</button>
 </div>
 
 <!-- MODAL -->
 <div class="overlay" id="modal" onclick="if(event.target===this)closeModalOnly()">
-  <div class="modal">
+  <div class="modal modal-2col">
     <button class="modal-close" onclick="closeModalOnly()">✕</button>
-    <p class="modal-cat" id="modal-cat"></p>
-    <div class="modal-pts" id="modal-pts" style="color:var(--mint)">×1</div>
-    <p class="modal-q" id="modal-q"></p>
+    <div class="modal-main">
+      <p class="modal-cat" id="modal-cat"></p>
+      <div class="modal-pts" id="modal-pts" style="color:var(--mint)">×1</div>
+      <p class="modal-q" id="modal-q"></p>
 
-    <p class="modal-live-title">Кто быстрее - того и баллы 🏁</p>
-    <div class="modal-music" id="modal-music">
-      <div class="modal-music-btns">
-        <button class="music-play-btn" id="music-play-btn" onclick="playTileMusic()">▶ Слушать</button>
-        <button class="music-replay-btn" onclick="replayTileMusic()">↺ Переслушать</button>
+      <div class="modal-music" id="modal-music">
+        <div class="modal-music-btns">
+          <button class="music-play-btn" id="music-play-btn" onclick="playTileMusic()">▶ Слушать</button>
+          <button class="music-replay-btn" onclick="replayTileMusic()">↺ Переслушать</button>
+        </div>
+      </div>
+
+      <div class="modal-ans" id="modal-ans">
+        <p class="modal-ans-label">Правильный ответ</p>
+        <p class="modal-ans-text" id="modal-ans-text"></p>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-mint" id="modal-reveal-btn" onclick="revealModalAnswer()">Показать ответ</button>
+        <button class="btn btn-secondary" onclick="closeModalDone()">Закрыть (плитка сгорает)</button>
       </div>
     </div>
-
-    <p class="modal-live-title">Ответ команды</p>
-    <div class="modal-live-grid" id="modal-live-grid"></div>
-    <div class="modal-ans" id="modal-ans">
-      <p class="modal-ans-label">Правильный ответ</p>
-      <p class="modal-ans-text" id="modal-ans-text"></p>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-mint" id="modal-reveal-btn" onclick="revealModalAnswer()">Показать ответ</button>
-      <button class="btn btn-secondary" onclick="closeModalDone()">Закрыть</button>
+    <div class="modal-side">
+      <p class="modal-live-title">Ответили первыми 🏁</p>
+      <div class="modal-live-grid" id="modal-live-grid"></div>
     </div>
   </div>
 </div>
@@ -425,7 +457,7 @@ audio.hidden-audio{display:none}
 <!-- FINAL -->
 <div class="screen centered" id="screen-final">
   <div class="final-emoji">🏆</div>
-  <h2 class="final-title">Квиз<br>Завершён! Люблю вас, ребята!</h2>
+  <h2 class="final-title">Квиз<br>Завершён!</h2>
   <p class="final-sub">Итоговые баллы команд</p>
   <div class="podium" id="podium"></div>
 </div>
@@ -438,14 +470,14 @@ var BG_MUSIC_VOLUME = 0.35;
 var TIMER_SECONDS   = 30;
 
 var r1data = [
+  {q:'Санька с волосами видели за твоим лицом? Вот сейчас увидели!', a:'Аркадий Укупник', hint:'', img:'images/photo_4.jpg', imgAnswer:'images/ans_4.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Джаред Лето', hint:'', img:'images/photo_1.jpg', imgAnswer:'images/ans_1.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Сидни Суини', hint:'', img:'images/photo_2.jpg', imgAnswer:'images/ans_2.jpg'},
-  {q:'Кто это тут спрятался за твоим лицом?', a:'Сергей Лазарев', hint:'', img:'images/photo_3.jpg', imgAnswer:'images/ans_3.jpg'},
-  {q:'Санька с волосами видели за твоим лицом? Вот сейчас увидели!', a:'Аркадий Укупник', hint:'', img:'images/photo_4.jpg', imgAnswer:'images/ans_4.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Дженифер Лоуренс', hint:'', img:'images/photo_5.jpg', imgAnswer:'images/ans_5.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Анжелика Варум', hint:'', img:'images/photo_6.jpg', imgAnswer:'images/ans_6.jpg'},
+  {q:'Кто это тут спрятался за твоим лицом?', a:'Сергей Лазарев', hint:'', img:'images/photo_3.jpg', imgAnswer:'images/ans_3.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Меган Фокс', hint:'', img:'images/photo_7.jpg', imgAnswer:'images/ans_7.jpg'},
-  {q:'Кто это тут спрятался за твоим лицом?', a:'✏️ Ответ 8', hint:'', img:'images/photo_8.jpg', imgAnswer:'images/ans_8.jpg'},
+  {q:'Кто это тут спрятался за твоим лицом?', a:'Кристина Агилера', hint:'', img:'images/photo_8.jpg', imgAnswer:'images/ans_8.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'✏️ Ответ 9', hint:'', img:'images/photo_9.jpg', imgAnswer:'images/ans_9.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'✏️ Ответ 10', hint:'Последний!', img:'images/photo_10.jpg', imgAnswer:'images/ans_10.jpg'},
 ];
@@ -468,14 +500,14 @@ var musicData = {
 
 var r3data = [
   {q:'От чего я никогда не откажусь на завтрак?', a:'А', hint:'', voiceFile:'', options:['Круассанчик','Манная каша','Игристое','Чай с молоком']},
-  {q:'Сколько у меня детей (не считая Френка)?', a:'В', hint:'', voiceFile:'', options:['Четверо','Трое','Ни одного','Один']},
-  {q:'На каком этаже я не жил?', a:'А', hint:'', voiceFile:'', options:['7','18','1','6']},
-  {q:'Моя "красная кнопка" - это когда кто-то', a:'В', hint:'я на все злюсь, но на один чуть больше', voiceFile:'', options:['Тупит как черт','Орет как тварь','Опаздывает','бабка в переходе метро']},
-  {q:'Мой идеальный отпуск - это', a:'Б', hint:'', voiceFile:'', options:['Лежать и ничего не делать на шезлонге','Носиться как ёбик по достопримечательностям','Гастротур','Спать']},
+  {q:'На каком фестивале я не был?', a:'В', hint:'', voiceFile:'', options:['Нашествие','Signal','Предвкушение','Один']},
+  {q:'Какой мой любимый фильм?', a:'Б', hint:'', voiceFile:'', options:['Хокум','Начало','Титаник','Поймай меня, если сможешь']},
+  {q:'Моя "рэдфлаг" - это когда кто-то:', a:'В', hint:'я на все злюсь, но на один чуть больше', voiceFile:'', options:['Тупит как черт','Орет как тварь','Опаздывает','Набухался']},
+  {q:'Мой идеальный отпуск - это:', a:'Б', hint:'', voiceFile:'', options:['Лежать и ничего не делать на шезлонге','Носиться как ёбик по достопримечательностям','Гастротур','Спать']},
   {q:'Какой вид выпечки у меня никогда не получался?', a:'Г', hint:'', voiceFile:'', options:['Багет','Морковный торт','Пирожки','Макаруны']},
-  {q:'В какой из этих стран меня не было', a:'В', hint:'', voiceFile:'', options:['Китай','Индонезия','Вьетнам','Тайланд']},
-  {q:'Любимый алкогольный напиток', a:'Г', hint:'', voiceFile:'', options:['Ром','Водка','Игристое','Белое сухое вино']},
-  {q:'Какой год на фотографии', a:'В', hint:'', voiceFile:'', options:['2008','2010','2012','2014'], img:'images/photo_11.jpg'},
+  {q:'Какой год на фотографии', a:'Б', hint:'', voiceFile:'', options:['1990','1992','1994','1996'], img:'images/photo_11.jpg'},
+  {q:'Любимый алкогольный напиток', a:'Г', hint:'', voiceFile:'', options:['Пиво','Водка','Игристое','Белое вино']},
+  {q:'Какой год на фотографии?', a:'В', hint:'', voiceFile:'', options:['2008','2010','2012','2014'], img:'images/photo_12.jpg'},
   {q:'Что из этого вообще не мое?', a:'В', hint:'', voiceFile:'', options:['Велосипед','Вейкборд','Скейтборд','Сноуборд']},
 ];
 
@@ -490,115 +522,180 @@ function ablyConnect() {
     sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     sbChannel = sb.channel('quiz-room', { config: { broadcast: { self: false } } });
 
+    // Ответ участника — первая отправка ИЛИ обновление существующего (редактирование в окне +5 сек)
     sbChannel.on('broadcast', { event: 'answer' }, function(payload) {
       var d = payload.payload;
       if (d.questionId !== currentQId) return;
-      if (!liveAnswers[d.team]) {
-        liveAnswers[d.team] = { answer: d.answer, teamName: d.teamName };
-        answersOrder.push({ team: d.team, answer: d.answer, teamName: d.teamName, time: Date.now() });
+      var isNew = !liveAnswers[d.id];
+      liveAnswers[d.id] = { answer: d.answer, name: d.name, editedAt: Date.now() };
+      if (isNew) {
+        answersOrder.push({ id: d.id, answer: d.answer, name: d.name, time: Date.now() });
+      } else {
+        // обновляем текст и время в существующей записи порядка (чтобы видно было что отредактировано)
+        var rec = answersOrder.find(function(a){ return a.id === d.id; });
+        if (rec) { rec.answer = d.answer; rec.edited = true; }
       }
       updateLiveAnswers();
       updateQScreenLive();
     });
 
-    sbChannel.on('broadcast', { event: 'team-name-update' }, function(payload) {
+    // Подключение/переподключение участника
+    sbChannel.on('broadcast', { event: 'participant-join' }, function(payload) {
       var d = payload.payload;
-      if (d.team !== undefined && d.name) {
-        teams[d.team].name = d.name;
-        renderScorebar(); renderQrTeams();
+      if (d.id && d.name) {
+        addParticipant(d.id, d.name);
       }
     });
 
+    // Запрос текущего вопроса при (пере)подключении капитана — шлём актуальный текст и опции
     sbChannel.on('broadcast', { event: 'request-current' }, function() {
-      if (currentQId) sbChannel.send({ type: 'broadcast', event: 'current-question', payload: { id: currentQId, text: '' } });
+      if (currentQId) {
+        sbChannel.send({ type: 'broadcast', event: 'current-question', payload: currentQPayload });
+      }
     });
 
     sbChannel.subscribe();
   } catch(e) { console.warn('Supabase:', e); }
 }
+
+var currentQPayload = null; // храним полный пейлоад последнего открытого вопроса для повторной отправки при reconnect
+
 function publishQuestion(id, text, activeTeam, options) {
   currentQId = id; liveAnswers = {}; answersOrder = [];
-  if (sbChannel) sbChannel.send({ type: 'broadcast', event: 'question-open', payload: { id: id, text: text, activeTeam: activeTeam, options: options || null } });
+  currentQPayload = { id: id, text: text, activeTeam: activeTeam, options: options || null };
+  if (sbChannel) sbChannel.send({ type: 'broadcast', event: 'question-open', payload: currentQPayload });
 }
 function closeQuestion() {
-  currentQId = null;
+  currentQId = null; currentQPayload = null;
   if (sbChannel) sbChannel.send({ type: 'broadcast', event: 'question-close', payload: {} });
 }
 
 /* ══ TEAMS ══ */
-var TEAM_COLORS = ['var(--gold)', 'var(--mint)', 'var(--purple)'];
-var teams = [{ name: 'Команда 1', pts: 0 }, { name: 'Команда 2', pts: 0 }, { name: 'Команда 3', pts: 0 }];
+/* ══ УЧАСТНИКИ (динамическая модель) ══
+   participants: { id: { name, pts, ptsByRound: {1:0,2:0,3:0}, joinedAt } }
+   participantOrder: [id, id, ...] — порядок подключения, для стабильного отображения */
+var participants = {};
+var participantOrder = [];
+var PARTICIPANT_COLORS = ['#F59E0B','#10F5A0','#8B5CF6','#f87171','#60A5FA','#FB923C','#A78BFA','#34D399','#F472B6','#FBBF24'];
 
-function renderScorebar() {
-  document.getElementById('scorebar').innerHTML = teams.map(function(t, i) {
-    return '<div class="score-team">' +
-      '<span class="score-team-name" style="color:' + TEAM_COLORS[i] + '">' + t.name + '</span>' +
-      '<span class="score-team-pts" id="pts-' + i + '" style="color:' + TEAM_COLORS[i] + '">' + t.pts + '</span>' +
-      '<button class="sbtn sbtn-minus" onclick="changeScore(' + i + ',-1)">−</button>' +
-      '<button class="sbtn sbtn-plus" onclick="changeScore(' + i + ',+1)">+</button>' +
-      '</div>';
-  }).join('');
+function colorFor(id) {
+  var idx = participantOrder.indexOf(id);
+  return PARTICIPANT_COLORS[idx % PARTICIPANT_COLORS.length];
 }
-function changeScore(i, d) {
-  teams[i].pts = Math.max(0, teams[i].pts + d);
-  var el = document.getElementById('pts-' + i);
-  if (el) el.textContent = teams[i].pts;
+
+function addParticipant(id, name) {
+  if (!participants[id]) {
+    participants[id] = { name: name, pts: 0, ptsByRound: {1:0,2:0,3:0}, joinedAt: Date.now() };
+    participantOrder.push(id);
+  } else {
+    participants[id].name = name; // обновляем имя на случай переподключения
+  }
+  renderQrParticipants();
 }
-function showScorebar(v) { document.getElementById('scorebar').classList.toggle('visible', v); }
-function renderQrTeams() {
-  document.getElementById('qr-teams').innerHTML = teams.map(function(t, i) {
-    return '<div class="qr-dot"><span style="width:9px;height:9px;border-radius:50%;background:' + TEAM_COLORS[i] + ';display:inline-block"></span>' + t.name + '</div>';
-  }).join('');
+
+function changeScore(id, d, round) {
+  if (!participants[id]) return;
+  participants[id].pts = Math.max(0, participants[id].pts + d);
+  if (round) participants[id].ptsByRound[round] = Math.max(0, (participants[id].ptsByRound[round] || 0) + d);
+}
+
+function renderQrParticipants() {
+  var el = document.getElementById('qr-teams');
+  if (!el) return;
+  var count = participantOrder.length;
+  el.innerHTML = '<div style="font-size:13px;color:var(--dim);margin-bottom:8px">Подключилось: ' + count + '</div>' +
+    participantOrder.map(function(id) {
+      var p = participants[id];
+      return '<div class="qr-dot"><span style="width:9px;height:9px;border-radius:50%;background:' + colorFor(id) + ';display:inline-block"></span>' + p.name + '</div>';
+    }).join('');
+}
+
+// Скорбар во время игры теперь скрыт по требованию — оставляем функцию-заглушку
+// чтобы не ломать вызовы showScorebar() по всему коду
+function showScorebar(v) { /* отключено: скорборд не показывается во время игры */ }
+function renderScorebar() { /* отключено */ }
+
+/* ══ ПРОВЕРКА ОТВЕТОВ (Левенштейн) ══
+   Используется для подсветки вероятно-правильных ответов с опечатками.
+   Решение о начислении баллов всегда принимает ведущий вручную. */
+function normalizeAnswer(s) {
+  return (s || '').toString().trim().toLowerCase().replace(/ё/g, 'е').replace(/[^\wа-яa-z0-9 ]/gi, '');
+}
+function levenshtein(a, b) {
+  a = normalizeAnswer(a); b = normalizeAnswer(b);
+  if (a === b) return 0;
+  var m = a.length, n = b.length;
+  if (!m) return n;
+  if (!n) return m;
+  var dp = [];
+  for (var i = 0; i <= m; i++) dp[i] = [i];
+  for (var j = 0; j <= n; j++) dp[0][j] = j;
+  for (i = 1; i <= m; i++) {
+    for (j = 1; j <= n; j++) {
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+// Допуск на опечатки: ~1 ошибка на каждые 6 символов правильного ответа, минимум 1
+function isCloseMatch(userAnswer, correctAnswer) {
+  var na = normalizeAnswer(userAnswer), nc = normalizeAnswer(correctAnswer);
+  if (!na || !nc) return false;
+  if (na === nc) return true;
+  var dist = levenshtein(na, nc);
+  var tolerance = Math.max(1, Math.floor(nc.length / 6));
+  return dist <= tolerance;
 }
 
 /* ══ TURN SYSTEM (R2) ══ */
-var r2TurnIndex = 0; // 0=team0, 1=team1, 2=team2, cycle
-var r2QuestionCount = 0;
+var r2TurnIndex = 0;
 
-function getActiveTurn() { return r2TurnIndex % teams.length; }
+function getActiveTurn() { return 0; } // ход теперь не привязан к фиксированным командам
 function advanceTurn() { r2TurnIndex++; }
 
 /* ══ LIVE ANSWERS ══ */
-// Храним порядок поступления ответов
-var answersOrder = []; // [{team, answer, teamName, time}]
+// Храним порядок поступления ответов: [{id, answer, name, time, edited}]
+var answersOrder = [];
 
+// Показываем только тех кто ОТВЕТИЛ (для 25 человек список «ждём» был бы бесконечным)
 function updateLiveAnswers() {
   var mg = document.getElementById('modal-live-grid');
   if (!mg) return;
-  // Сортируем по времени поступления
   var sorted = answersOrder.slice().sort(function(a, b) { return a.time - b.time; });
-  mg.innerHTML = teams.map(function(t, i) {
-    var la = liveAnswers[i];
-    var pos = -1;
-    for (var j = 0; j < sorted.length; j++) { if (sorted[j].team === i) { pos = j + 1; break; } }
-    var posLabel = pos > 0 ? ['🥇','🥈','🥉'][pos-1] || ('#'+pos) : '';
-    return '<div class="mlive-box' + (la ? ' has' : '') + '">' +
-      '<div class="mlive-name" style="color:' + TEAM_COLORS[i] + '">' + posLabel + ' ' + t.name + '</div>' +
-      (la ? '<div class="mlive-ans">' + la.answer + '</div>' : '<div class="mlive-wait">⏳</div>') +
-      '<button class="mlive-award" onclick="awardTilePoints(' + i + ')" id="award-' + i + '">+ ' + curTilePts + ' балл</button>' +
+  var top10 = sorted.slice(0, 10);
+  var extra = sorted.length - 10;
+  if (!sorted.length) {
+    mg.innerHTML = '<div class="mlive-empty">Ответов пока нет...</div>';
+    return;
+  }
+  mg.innerHTML = top10.map(function(a, idx) {
+    var posLabel = ['🥇','🥈','🥉'][idx] || ('#' + (idx + 1));
+    var autoCorrect = currentCorrectAnswer && isCloseMatch(a.answer, currentCorrectAnswer);
+    return '<div class="mlive-box has' + (a.edited ? ' edited' : '') + '">' +
+      '<div class="mlive-name" style="color:' + colorFor(a.id) + '">' + posLabel + ' ' + a.name + (a.edited ? ' ✏️' : '') + '</div>' +
+      '<div class="mlive-ans">' + a.answer + (autoCorrect ? ' ✅' : '') + '</div>' +
+      '<button class="mlive-award" onclick="awardTilePoints(\'' + a.id + '\')" id="award-' + a.id + '">+ ' + curTilePts + ' балл</button>' +
       '</div>';
-  }).join('');
+  }).join('') + (extra > 0 ? '<div class="mlive-extra">+ ещё ' + extra + ' ответили позже</div>' : '');
 }
 
 var curTilePts = 1; // множитель текущей плитки
-function awardTilePoints(teamIdx) {
-  changeScore(teamIdx, curTilePts);
-  var btn = document.getElementById('award-' + teamIdx);
+var currentCorrectAnswer = ''; // для подсветки автосовпадений в live-листе
+function awardTilePoints(id) {
+  changeScore(id, curTilePts, 2);
+  var btn = document.getElementById('award-' + id);
   if (btn) { btn.textContent = '✅ +' + curTilePts; btn.classList.add('done'); }
 }
 
+// На экране самого вопроса (раунды 1 и 3) показываем только счётчик ответивших —
+// полный список из 25 имён занял бы весь экран
 function updateQScreenLive() {
   if (!currentQId) return;
   var container = document.getElementById('qlive-' + currentQId);
   if (!container) return;
-  container.innerHTML = teams.map(function(t, i) {
-    var la = liveAnswers[i];
-    return '<div class="q-live-row' + (la ? ' has' : '') + '">' +
-      '<div class="q-live-dot" style="background:' + TEAM_COLORS[i] + '"></div>' +
-      '<div class="q-live-name" style="color:' + TEAM_COLORS[i] + '">' + t.name + '</div>' +
-      (la ? '<div class="q-live-ans">✅</div>' : '<div class="q-live-wait">ждём...</div>') +
-      '</div>';
-  }).join('');
+  var answeredCount = Object.keys(liveAnswers).length;
+  var totalCount = participantOrder.length;
+  container.innerHTML = '<div class="q-live-counter">✅ Ответили: ' + answeredCount + ' / ' + totalCount + '</div>';
 }
 
 /* ══ AUDIO ══ */
@@ -652,6 +749,7 @@ function stopTileMusic() {
 var timerInterval = null;
 function startTimer(qId) {
   clearInterval(timerInterval);
+  clearTimeout(window._answerCloseTimeout);
   var el = document.getElementById('t-num-' + qId);
   var circle = document.getElementById('t-prog-' + qId);
   if (!el || !circle) return;
@@ -666,8 +764,17 @@ function startTimer(qId) {
     circle.style.strokeDashoffset = String(dash * (1 - t / TIMER_SECONDS));
     if (t <= 10) { el.className = 't-num warn'; circle.className = 't-prog warn'; }
   }, 1000);
+  // Автоматически закрываем приём/редактирование ответов через TIMER_SECONDS + 5 сек
+  window._answerCloseTimeout = setTimeout(function() {
+    lockAnswers();
+  }, (TIMER_SECONDS + 5) * 1000);
 }
-function stopTimer() { clearInterval(timerInterval); stopBgMusic(); stopVoiceover(); }
+function stopTimer() { clearInterval(timerInterval); clearTimeout(window._answerCloseTimeout); stopBgMusic(); stopVoiceover(); }
+
+// Закрывает окно приёма ответов у капитанов (но НЕ переключает экран ведущего)
+function lockAnswers() {
+  if (sbChannel) sbChannel.send({ type: 'broadcast', event: 'answers-locked', payload: {} });
+}
 
 /* ══ BUILD QUESTIONS & ANSWER SCREENS ══ */
 function buildQuestions(data, round, nextScreen) {
@@ -687,6 +794,10 @@ function buildQuestions(data, round, nextScreen) {
     var nextTarget = isLast ? nextScreen : ('r' + round + '-q' + (num + 1));
     var nextLabel = isLast ? (round === 1 ? 'Раунд 2 →' : 'Финал 🎉') : 'Следующий →';
     var nextClass = isLast ? (round === 1 ? 'btn-gold' : 'btn-primary') : 'btn-secondary';
+    // Раунд 1 после последнего вопроса идёт через титры; раунд 3 — сразу в финал
+    var nextOnClick = (isLast && round === 1)
+      ? "stopTimer();closeQuestion();showLeaderboard('" + nextTarget + "')"
+      : "stopTimer();closeQuestion();goTo('" + nextTarget + "')";
     var hasImg = item.img ? true : false;
     var hasVoice = round === 3 && item.voiceFile;
 
@@ -716,12 +827,8 @@ function buildQuestions(data, round, nextScreen) {
         (item.hint ? '<p class="q-hint-text">' + item.hint + '</p>' : '') +
         (item.options && item.options.length ? '<div class="options-grid" style="margin-top:12px">' + item.options.map(function(opt,oi){var l=['А','Б','В','Г'][oi]||oi+1;return '<div class="opt-item"><span class="opt-letter">'+l+'</span>'+opt+'</div>';}).join('') + '</div>' : '') +
       '</div>' +
-      '<div class="q-live-block"><p class="q-live-title">Ответы команд</p>' +
-        '<div id="qlive-' + qId + '">' +
-        teams.map(function(t, i) {
-          return '<div class="q-live-row"><div class="q-live-dot" style="background:' + TEAM_COLORS[i] + '"></div><div class="q-live-name" style="color:' + TEAM_COLORS[i] + '">' + t.name + '</div><div class="q-live-wait">ждём...</div></div>';
-        }).join('') +
-        '</div>' +
+      '<div class="q-live-block"><p class="q-live-title">Ответы участников</p>' +
+        '<div id="qlive-' + qId + '"><div class="q-live-counter">✅ Ответили: 0 / ' + (participantOrder.length || 0) + '</div></div>' +
       '</div>' +
       '<div class="q-buttons">' +
         '<button class="btn btn-mint" style="width:100%" onclick="showAnswerScreen(\'' + qId + '\',\'' + aId + '\')">Показать ответ →</button>' +
@@ -754,16 +861,7 @@ function buildQuestions(data, round, nextScreen) {
         '</div>';
     }
 
-    var teamRows = teams.map(function(t, i) {
-      return '<div class="ans-team-row" id="atr-' + aId + '-' + i + '" onclick="toggleTeam(\'' + aId + '\',' + i + ')">' +
-        '<div class="ans-chk"></div>' +
-        '<div class="ans-team-info">' +
-          '<div class="ans-team-name" style="color:' + TEAM_COLORS[i] + '">' + t.name + '</div>' +
-          '<div class="ans-team-answer" id="atr-ans-' + aId + '-' + i + '">ответ появится здесь</div>' +
-        '</div></div>';
-    }).join('');
-
-    aHtml += '<div class="ans-screen' + (!hasImg ? ' no-img' : '') + '" id="screen-' + aId + '">' +
+    aHtml += '<div class="ans-screen' + (!hasImg ? ' no-img' : '') + '" id="screen-' + aId + '" data-correct="' + (item.a || '').replace(/"/g,'&quot;') + '" data-round="' + round + '">' +
       ansImgSide +
       '<div class="ans-text-side">' +
         (item.options && item.options.length
@@ -771,12 +869,12 @@ function buildQuestions(data, round, nextScreen) {
           : '<p class="ans-label-top">✅ Правильный ответ</p><p class="ans-correct-text">' + item.a + '</p>'
         ) +
         optionsHtml +
-        '<div style="margin-top:18px">' + teamRows + '</div>' +
-        '<p class="apply-note">Нажми на команду чтобы отметить ✅</p>' +
+        '<div class="ans-participants" id="ans-participants-' + aId + '" style="margin-top:18px"></div>' +
+        '<p class="apply-note">Нажми на участника чтобы отметить ✅ (зелёная галочка — похоже на правильный ответ)</p>' +
         '<div class="ans-buttons">' +
           '<button class="btn btn-secondary" onclick="returnToQuestion(\'' + qId + '\',\'' + aId + '\')">← Назад</button>' +
           '<button class="apply-btn-inline" id="apply-btn-' + aId + '" onclick="applyPoints(\'' + aId + '\')">🏆 Начислить</button>' +
-          '<button class="btn ' + nextClass + '" id="next-btn-' + aId + '" onclick="stopTimer();closeQuestion();goTo(\'' + nextTarget + '\')">' + nextLabel + '</button>' +
+          '<button class="btn ' + nextClass + '" id="next-btn-' + aId + '" onclick="' + nextOnClick + '">' + nextLabel + '</button>' +
         '</div>' +
       '</div></div>';
   }
@@ -789,17 +887,58 @@ function buildQuestions(data, round, nextScreen) {
 var currentAnswerQId = null;
 
 function showAnswerScreen(qId, aId) {
-  for (var i = 0; i < teams.length; i++) {
-    var la = liveAnswers[i];
-    var el = document.getElementById('atr-ans-' + aId + '-' + i);
-    if (el) el.textContent = la ? la.answer : 'не ответили';
-  }
   currentAnswerQId = qId;
   stopTimer();
   hideAll();
   var next = document.getElementById('screen-' + aId);
   if (next) next.classList.add('active');
-  showScorebar(true);
+  renderAnsParticipants(aId);
+}
+
+// Рендерим список участников динамически — кто ответил идёт первым (отсортирован по похожести),
+// кто не ответил — внизу приглушённым списком
+function renderAnsParticipants(aId) {
+  var container = document.getElementById('ans-participants-' + aId);
+  if (!container) return;
+  var screenEl = document.getElementById('screen-' + aId);
+  var correctAnswer = screenEl ? screenEl.dataset.correct : '';
+
+  var answered = [];
+  var notAnswered = [];
+  participantOrder.forEach(function(id) {
+    var p = participants[id];
+    var la = liveAnswers[id];
+    if (la) answered.push({ id: id, name: p.name, answer: la.answer, edited: la.edited });
+    else notAnswered.push({ id: id, name: p.name });
+  });
+  // Похожие на правильный ответ — наверх
+  answered.sort(function(a, b) {
+    var ac = isCloseMatch(a.answer, correctAnswer) ? 1 : 0;
+    var bc = isCloseMatch(b.answer, correctAnswer) ? 1 : 0;
+    return bc - ac;
+  });
+
+  var html = '';
+  if (answered.length) {
+    html += answered.map(function(a) {
+      var auto = isCloseMatch(a.answer, correctAnswer);
+      return '<div class="ans-team-row' + (auto ? ' suggest-correct' : '') + '" id="atr-' + aId + '-' + a.id + '" onclick="toggleParticipant(\'' + aId + '\',\'' + a.id + '\')">' +
+        '<div class="ans-chk"></div>' +
+        '<div class="ans-team-info">' +
+          '<div class="ans-team-name" style="color:' + colorFor(a.id) + '">' + a.name + (auto ? ' <span class="auto-tag">похоже верно</span>' : '') + '</div>' +
+          '<div class="ans-team-answer">' + a.answer + '</div>' +
+        '</div></div>';
+    }).join('');
+  }
+  if (notAnswered.length) {
+    html += '<div class="ans-noanswer-label">Не ответили (' + notAnswered.length + ')</div>' +
+      notAnswered.map(function(a) {
+        return '<div class="ans-team-row dim-row" id="atr-' + aId + '-' + a.id + '" onclick="toggleParticipant(\'' + aId + '\',\'' + a.id + '\')">' +
+          '<div class="ans-chk"></div>' +
+          '<div class="ans-team-info"><div class="ans-team-name">' + a.name + '</div></div></div>';
+      }).join('');
+  }
+  container.innerHTML = html || '<p style="color:var(--dim);text-align:center;padding:20px 0">Пока никто не подключился</p>';
 }
 
 function returnToQuestion(qId, aId) {
@@ -808,24 +947,22 @@ function returnToQuestion(qId, aId) {
   if (next) next.classList.add('active');
   current = qId;
   startTimer(qId);
-  showScorebar(true);
 }
 
-function toggleTeam(aId, idx) {
-  var row = document.getElementById('atr-' + aId + '-' + idx);
+function toggleParticipant(aId, id) {
+  var row = document.getElementById('atr-' + aId + '-' + id);
   if (row) row.classList.toggle('correct');
 }
 function applyPoints(aId) {
-  for (var i = 0; i < teams.length; i++) {
-    var row = document.getElementById('atr-' + aId + '-' + i);
+  var round = document.getElementById('screen-' + aId).dataset.round;
+  participantOrder.forEach(function(id) {
+    var row = document.getElementById('atr-' + aId + '-' + id);
     if (row && row.classList.contains('correct')) {
-      teams[i].pts++;
-      var el = document.getElementById('pts-' + i);
-      if (el) el.textContent = teams[i].pts;
+      changeScore(id, 1, round);
       row.classList.remove('correct');
+      row.classList.add('was-awarded');
     }
-  }
-  // Деактивируем кнопку «Начислить» — баллы уже записаны
+  });
   var applyBtn = document.getElementById('apply-btn-' + aId);
   if (applyBtn) {
     applyBtn.textContent = '✅ Начислено';
@@ -897,7 +1034,7 @@ function openTile(tile) {
     musicEl.classList.remove('show');
   }
 
-  publishQuestion('music-' + cat + '-' + diff, d.q || 'Угадай трек', -1);
+  publishQuestion('music-' + cat + '-' + diff, d.q || 'Назови исполнителя', -1);
   updateLiveAnswers();
   document.getElementById('modal').classList.add('open');
 }
@@ -927,54 +1064,45 @@ function closeModalDone() {
   closeQuestion();
 }
 
-/* ══ RANDOMIZER ══ */
-var names = [], numTeams = 3;
+/* ══ RANDOMIZER ══
+   Справочный инструмент: случайно делит уже подключившихся участников на N групп.
+   НЕ влияет на игровую логику и баллы — баллы всегда привязаны к id участника. */
+var numTeams = 2;
 function setTeams(n, btn) {
   numTeams = n;
   document.querySelectorAll('.rand-num-btn').forEach(function(b) { b.classList.remove('active'); });
   btn.classList.add('active');
 }
-function randAddName(e) {
-  if (e.key !== 'Enter') return;
-  var inp = document.getElementById('rand-input'), v = inp.value.trim();
-  if (!v || names.indexOf(v) !== -1) return;
-  names.push(v); inp.value = ''; renderNames();
-}
-function removeName(i) { names.splice(i, 1); renderNames(); }
-function clearNames() {
-  names = [];
-  document.getElementById('teams-result').style.display = 'none';
-  document.getElementById('rand-start-btn').style.display = 'none';
-  renderNames();
-}
-function renderNames() {
-  document.getElementById('names-list').innerHTML = names.map(function(n, i) {
-    return '<div class="name-chip"><span>' + n + '</span><span class="name-chip-del" onclick="removeName(' + i + ')">✕</span></div>';
-  }).join('');
+function updateRandConnectedCount() {
+  var el = document.getElementById('rand-connected-count');
+  if (el) el.textContent = 'Подключено: ' + participantOrder.length + ' участников';
 }
 function doShuffle() {
-  if (names.length < numTeams) { alert('Добавь хотя бы ' + numTeams + ' участника!'); return; }
+  updateRandConnectedCount();
+  if (participantOrder.length < numTeams) {
+    alert('Пока подключилось меньше людей чем команд — подожди ещё участников или выбери меньше команд.');
+    return;
+  }
+  var names = participantOrder.map(function(id) { return participants[id].name; });
   var sh = names.slice().sort(function() { return Math.random() - .5; });
   var res = [];
   for (var i = 0; i < numTeams; i++) res.push([]);
   sh.forEach(function(n, i) { res[i % numTeams].push(n); });
-  var labels = ['🥇 Команда 1', '🥈 Команда 2', '🥉 Команда 3'];
+  var labels = ['🥇 Команда 1', '🥈 Команда 2', '🥉 Команда 3', '🏅 Команда 4', '🎖️ Команда 5'];
   document.getElementById('teams-result').innerHTML = res.map(function(m, i) {
     return '<div class="team-card"><div class="team-card-label">' + labels[i] + '</div><div class="team-card-members">' + m.join('<br>') + '</div></div>';
   }).join('');
   document.getElementById('teams-result').style.display = 'grid';
-  teams = res.map(function(m, i) { return { name: labels[i].replace(/[🥇🥈🥉] /, ''), pts: 0 }; });
-  document.getElementById('rand-start-btn').style.display = '';
 }
-function applyTeamsAndStart() { renderScorebar(); showScorebar(true); renderQrTeams(); goTo('qr'); }
-function startQuiz() { renderScorebar(); showScorebar(true); goTo('r1-intro'); }
+function startQuiz() { goTo('r1-intro'); }
 
 /* ══ FINAL ══ */
 function renderPodium() {
-  var sorted = teams.map(function(t, i) { return { name: t.name, pts: t.pts, c: TEAM_COLORS[i] }; })
-    .sort(function(a, b) { return b.pts - a.pts; });
+  var sorted = participantOrder.map(function(id) {
+    return { name: participants[id].name, pts: participants[id].pts, c: colorFor(id) };
+  }).sort(function(a, b) { return b.pts - a.pts; });
   document.getElementById('podium').innerHTML = sorted.map(function(t, i) {
-    return '<div class="podium-row"><div class="podium-rank">' + (['🥇', '🥈', '🥉'][i] || '') + '</div>' +
+    return '<div class="podium-row"><div class="podium-rank">' + (['🥇', '🥈', '🥉'][i] || ('#' + (i+1))) + '</div>' +
       '<div class="podium-name" style="color:' + t.c + '">' + t.name + '</div>' +
       '<div class="podium-pts" style="color:' + t.c + '">' + t.pts + ' очков</div></div>';
   }).join('');
@@ -997,7 +1125,8 @@ function buildScreenMap() {
   SCREENS = {
     intro: 'screen-intro', qr: 'screen-qr', randomizer: 'screen-randomizer',
     'r1-intro': 'screen-r1-intro', 'r2-intro': 'screen-r2-intro',
-    'r2-board': 'screen-r2-board', 'r3-intro': 'screen-r3-intro', final: 'screen-final'
+    'r2-board': 'screen-r2-board', 'r3-intro': 'screen-r3-intro', final: 'screen-final',
+    leaderboard: 'screen-leaderboard'
   };
   for (var i = 1; i <= 10; i++) {
     SCREENS['r1-q' + i] = 'screen-r1-q' + i;
@@ -1005,7 +1134,7 @@ function buildScreenMap() {
   }
 }
 
-var ORDER = ['intro','qr','randomizer','r1-intro','r1-q1','r1-q2','r1-q3','r1-q4','r1-q5','r1-q6','r1-q7','r1-q8','r1-q9','r1-q10','r2-intro','r2-board','r3-intro','r3-q1','r3-q2','r3-q3','r3-q4','r3-q5','r3-q6','r3-q7','r3-q8','r3-q9','r3-q10','final'];
+var ORDER = ['intro','qr','randomizer','r1-intro','r1-q1','r1-q2','r1-q3','r1-q4','r1-q5','r1-q6','r1-q7','r1-q8','r1-q9','r1-q10','leaderboard','r2-intro','r2-board','r3-intro','r3-q1','r3-q2','r3-q3','r3-q4','r3-q5','r3-q6','r3-q7','r3-q8','r3-q9','r3-q10','final'];
 
 function hideAll() {
   // Принудительно закрываем модал при любом переходе
@@ -1016,10 +1145,70 @@ function hideAll() {
   });
 }
 
+/* ══ LEADERBOARD (титры между раундами) ══ */
+var lbTimeouts = [];
+var STEP_MS = 400; // 0.4 сек на участника
+
+function showLeaderboard(afterTarget) {
+  goTo('leaderboard');
+  document.getElementById('lb-eye').textContent =
+    afterTarget === 'r2-intro' ? '📊 ИТОГИ РАУНДА 1' : '📊 ИТОГИ РАУНДА 2';
+
+  // Сортируем участников по убыванию очков
+  var sorted = participantOrder.map(function(id) { return { id: id, p: participants[id] }; })
+    .sort(function(a, b) { return b.p.pts - a.p.pts; });
+
+  var list = document.getElementById('lb-list');
+  var continueBtn = document.getElementById('lb-continue-btn');
+  continueBtn.style.display = 'none';
+  continueBtn.onclick = function() { goTo(afterTarget); };
+
+  // Очищаем предыдущие таймеры на случай повторного вызова
+  lbTimeouts.forEach(function(t){ clearTimeout(t); });
+  lbTimeouts = [];
+
+  if (!sorted.length) {
+    list.innerHTML = '<p style="color:var(--dim)">Пока нет участников с баллами</p>';
+    continueBtn.style.display = 'inline-flex';
+    return;
+  }
+
+  // Строим строки заранее (снизу = последнее место первым), скрытые
+  list.innerHTML = sorted.map(function(item, idx) {
+    var place = idx + 1;
+    var medal = place === 1 ? '🥇' : place === 2 ? '🥈' : place === 3 ? '🥉' : ('#' + place);
+    return '<div class="lb-row" id="lb-row-' + idx + '" style="opacity:0;transform:translateY(16px)">' +
+      '<span class="lb-place">' + medal + '</span>' +
+      '<span class="lb-name" style="color:' + colorFor(item.id) + '">' + item.p.name + '</span>' +
+      '<span class="lb-pts">' + item.p.pts + '</span>' +
+      '</div>';
+  }).join('');
+
+  // Анимация снизу вверх: последнее место появляется первым
+  var n = sorted.length;
+  for (var i = n - 1; i >= 0; i--) {
+    (function(idx) {
+      var delay = (n - 1 - idx) * STEP_MS;
+      var t = setTimeout(function() {
+        var row = document.getElementById('lb-row-' + idx);
+        if (row) { row.style.opacity = '1'; row.style.transform = 'translateY(0)'; }
+        if (idx === 0) {
+          setTimeout(function(){ continueBtn.style.display = 'inline-flex'; }, 500);
+        }
+      }, delay);
+      lbTimeouts.push(t);
+    })(i);
+  }
+}
+function finishLeaderboard() {
+  // запасной обработчик, реальная логика — в onclick кнопки (afterTarget)
+}
+
 function goTo(id) {
   stopTimer();
   hideAll();
   current = id;
+  if (id === 'randomizer') updateRandConnectedCount();
 
   var screenId = SCREENS[id] || ('screen-' + id);
   var next = document.getElementById(screenId);
@@ -1072,7 +1261,7 @@ function getRound(id) {
   return 3;
 }
 function getLabel(id) {
-  var m = { qr: '📱 QR', 'r1-intro': '🖼️ Картинки', 'r2-intro': '🎵 Музыка', 'r2-board': '🎵 Доска', 'r3-intro': '🧠 Обо мне', final: '🏆 Финал' };
+  var m = { qr: '📱 QR', 'r1-intro': '🖼️ Картинки', 'r2-intro': '🎵 Музыка', 'r2-board': '🎵 Доска', 'r3-intro': '🧠 Обо мне', final: '🏆 Финал', leaderboard: '📊 Итоги' };
   if (m[id]) return m[id];
   if (/^r1-q/.test(id)) return '🖼️ ' + id.replace('r1-q', '') + ' / 10';
   if (/^r3-q/.test(id)) return '🧠 ' + id.replace('r3-q', '') + ' / 10';
@@ -1083,8 +1272,7 @@ function getLabel(id) {
 buildQuestions(r1data, 1, 'r2-intro');
 buildQuestions(r3data, 3, 'final');
 buildBoard();
-renderScorebar();
-renderQrTeams();
+renderQrParticipants();
 buildScreenMap();
 document.getElementById('screen-intro').classList.add('active');
 ablyConnect();
