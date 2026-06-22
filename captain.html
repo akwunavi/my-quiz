@@ -136,6 +136,13 @@ var currentQ = null, hasSent = false, lastSentAnswer = '';
 var sb, ch;
 var STORAGE_KEY = 'quiz_participant';
 
+// Читаем gameId из URL (?game=xxx) — он генерируется ведущим при каждой новой игре
+function getGameIdFromUrl() {
+  var m = window.location.search.match(/[?&]game=([^&]+)/);
+  return m ? m[1] : null;
+}
+var currentGameId = getGameIdFromUrl();
+
 /* ── PAGES ── */
 function showPage(id) {
   ['pg-name','pg-answer'].forEach(function(p){
@@ -143,26 +150,15 @@ function showPage(id) {
   });
 }
 
-/* ── ID generation & persistence ── */
-function getOrCreateId() {
-  var saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      var data = JSON.parse(saved);
-      return data;
-    } catch(e) {}
-  }
-  return null;
+/* ── SESSION MANAGEMENT ── */
+function getSavedSession() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) { return null; }
 }
-function saveParticipant(id, name) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ id: id, name: name }));
+function saveSession(id, name, gameId, lastQId) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ id: id, name: name, gameId: gameId, lastQId: lastQId || null }));
 }
-function clearParticipant() {
-  localStorage.removeItem(STORAGE_KEY);
-}
-function genId() {
-  return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
-}
+function clearSession() { localStorage.removeItem(STORAGE_KEY); }
+function genId() { return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
 
 /* ── STEP 1: name entry ── */
 function checkName() {
@@ -176,29 +172,36 @@ function confirmName() {
   if (!v) return;
   myName = v;
   myId = genId();
-  saveParticipant(myId, myName);
+  saveSession(myId, myName, currentGameId, null);
   enterGame();
 }
 function enterGame() {
   showPage('pg-answer');
   connect();
 }
-
-/* ── BACK / reset identity ── */
 function backToTeams() {
   myId = ''; myName = ''; currentQ = null; hasSent = false;
   document.getElementById('name-input').value = '';
-  clearParticipant();
+  clearSession();
   showPage('pg-name');
   if (sb && ch) sb.removeChannel(ch);
 }
 
 /* ── Auto-resume on load ── */
 window.addEventListener('DOMContentLoaded', function() {
-  var saved = getOrCreateId();
+  var saved = getSavedSession();
   if (saved && saved.id && saved.name) {
+    if (currentGameId && saved.gameId !== currentGameId) {
+      // Новая игра — чистим старую сессию и просим ввести имя заново
+      clearSession();
+      showPage('pg-name');
+      return;
+    }
+    // Та же игра — восстанавливаем
     myId = saved.id;
     myName = saved.name;
+    // hasSent сбрасываем — текущий вопрос запросим заново, проверим совпадение по id
+    hasSent = false;
     enterGame();
   }
 });
@@ -229,9 +232,16 @@ function connect() {
     ch.on('broadcast', { event: 'current-question' }, function(payload){
       if (payload.payload) {
         currentQ = payload.payload; lastKnownQId = payload.payload.id;
-        if (!hasSent) showQ(payload.payload.text, payload.payload.options);
-      } else if (!payload.payload && currentQ) {
-        // ведущий ответил что вопроса сейчас нет, а у нас остался старый — сбрасываем
+        // Если уже отвечали на этот вопрос в этой сессии — восстанавливаем статус
+        var saved = getSavedSession();
+        if (saved && saved.lastQId === payload.payload.id) {
+          hasSent = true;
+          showSent(lastSentAnswer || '(ответ отправлен)');
+        } else {
+          hasSent = false;
+          showQ(payload.payload.text, payload.payload.options);
+        }
+      } else {
         currentQ = null; lastKnownQId = null; showWait();
       }
     });
@@ -361,7 +371,7 @@ function sendOptionAnswer(letter) {
   if (!myId) return;
   lastSentAnswer = letter;
   ch.send({ type: 'broadcast', event: 'answer', payload: { id: myId, name: myName, answer: letter, questionId: currentQ && currentQ.id } })
-    .then(function(){ hasSent = true; showSent(letter); showToast(hasSent ? '✅ Ответ обновлён!' : '✅ Ответ отправлен!'); })
+    .then(function(){ hasSent = true; saveSession(myId, myName, currentGameId, currentQ && currentQ.id); showSent(letter); showToast(hasSent ? '✅ Ответ обновлён!' : '✅ Ответ отправлен!'); })
     .catch(function(){ showToast('❌ Ошибка отправки', true); });
 }
 function sendAnswer(isEdit) {
@@ -370,7 +380,7 @@ function sendAnswer(isEdit) {
   if (!v || !myId) return;
   lastSentAnswer = v;
   ch.send({ type: 'broadcast', event: 'answer', payload: { id: myId, name: myName, answer: v, questionId: currentQ && currentQ.id } })
-    .then(function(){ hasSent = true; showSent(v); showToast(isEdit ? '✅ Ответ обновлён!' : '✅ Ответ отправлен!'); })
+    .then(function(){ hasSent = true; saveSession(myId, myName, currentGameId, currentQ && currentQ.id); showSent(v); showToast(isEdit ? '✅ Ответ обновлён!' : '✅ Ответ отправлен!'); })
     .catch(function(){ showToast('❌ Ошибка отправки', true); });
 }
 

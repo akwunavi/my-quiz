@@ -47,12 +47,12 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 
 /* ── TYPOGRAPHY ── */
 .eyebrow{font-size:11px;font-weight:500;letter-spacing:4px;text-transform:uppercase;color:var(--mint);margin-bottom:18px;text-align:center}
-.display{font-family:'Syne',sans-serif;font-size:clamp(52px,11vw,110px);font-weight:800;line-height:.9;text-align:center;background:linear-gradient(135deg,var(--white) 0%,var(--purple) 60%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
+.display{font-family:'Syne',sans-serif;font-size:clamp(80px,18vw,200px);font-weight:800;line-height:.85;text-align:center;background:linear-gradient(135deg,var(--white) 0%,var(--purple) 60%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px}
 .subtitle{font-size:16px;font-weight:300;color:var(--dim);text-align:center;margin-bottom:40px}
-.round-num{font-family:'Syne',sans-serif;font-size:200px;font-weight:800;position:absolute;opacity:.04;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;user-select:none}
-.round-badge{font-size:11px;font-weight:500;letter-spacing:4px;text-transform:uppercase;margin-bottom:16px;text-align:center}
-.round-title{font-family:'Syne',sans-serif;font-size:clamp(36px,8vw,80px);font-weight:800;line-height:1;text-align:center;margin-bottom:16px}
-.round-desc{font-size:14px;color:var(--dim);text-align:center;max-width:380px;line-height:1.65;margin-bottom:36px}
+.round-num{font-family:'Syne',sans-serif;font-size:clamp(180px,28vw,320px);font-weight:800;position:absolute;opacity:.05;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;user-select:none}
+.round-badge{font-size:clamp(11px,1.5vw,14px);font-weight:500;letter-spacing:4px;text-transform:uppercase;margin-bottom:16px;text-align:center}
+.round-title{font-family:'Syne',sans-serif;font-size:clamp(52px,12vw,130px);font-weight:800;line-height:.9;text-align:center;margin-bottom:20px}
+.round-desc{font-size:clamp(14px,1.6vw,18px);color:var(--dim);text-align:center;max-width:480px;line-height:1.65;margin-bottom:36px}
 .line{width:48px;height:2px;background:linear-gradient(90deg,transparent,currentColor,transparent);margin:0 auto 24px;opacity:.5}
 .orb{position:absolute;width:700px;height:700px;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:-1}
 .r1 .round-badge,.r1 .round-num{color:var(--gold)}.r1 .round-title{color:var(--gold)}.r1 .orb{background:radial-gradient(circle,rgba(245,158,11,.22) 0%,transparent 70%)}
@@ -78,13 +78,13 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 .t-ring circle{fill:none;stroke:rgba(255,255,255,.08);stroke-width:6}
 .t-prog{stroke:var(--mint);stroke-dasharray:376;stroke-dashoffset:0;transition:stroke-dashoffset .95s linear,stroke .3s}
 .t-prog.warn{stroke:var(--red)}
-.t-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Syne',sans-serif;font-size:52px;font-weight:800;color:var(--mint);line-height:1}
+.t-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Syne',sans-serif;font-size:clamp(60px,7vw,96px);font-weight:800;color:var(--mint);line-height:1}
 .t-num.warn{color:var(--red)}
 .t-sublabel{font-size:12px;color:var(--dim);margin-top:10px;letter-spacing:2px;text-transform:uppercase}
 
 .q-question-block{flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px}
 .q-round-label{font-size:10px;font-weight:500;letter-spacing:4px;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
-.q-question{font-family:'Syne',sans-serif;font-size:clamp(18px,2.5vw,32px);font-weight:800;line-height:1.25}
+.q-question{font-family:'Syne',sans-serif;font-size:clamp(24px,3.5vw,48px);font-weight:800;line-height:1.2}
 .q-hint-text{font-size:13px;color:var(--dim);font-style:italic}
 
 .q-live-block{margin-top:12px}
@@ -113,9 +113,9 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 .ans-photo{width:100%;height:100%;object-fit:contain;display:block;background:#111}
 .ans-photo-overlay{position:absolute;inset:0;background:linear-gradient(to right,transparent 50%,rgba(7,7,26,.8))}
 
-.ans-text-side{display:flex;flex-direction:column;justify-content:center;padding:28px 28px 28px 28px;background:linear-gradient(135deg,rgba(7,7,26,.99),rgba(13,13,43,.99));overflow-y:auto;gap:14px}
-.ans-label-top{font-size:10px;font-weight:500;letter-spacing:4px;text-transform:uppercase;color:var(--mint)}
-.ans-correct-text{font-family:'Syne',sans-serif;font-size:clamp(22px,3vw,40px);font-weight:800;line-height:1.15;color:var(--white)}
+.ans-text-side{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px 28px 28px 28px;background:linear-gradient(135deg,rgba(7,7,26,.99),rgba(13,13,43,.99));overflow-y:auto;gap:14px}
+.ans-label-top{font-size:11px;font-weight:500;letter-spacing:4px;text-transform:uppercase;color:var(--mint);text-align:center;width:100%}
+.ans-correct-text{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,64px);font-weight:800;line-height:1.1;color:var(--white);text-align:center;width:100%}
 
 .ans-participants{max-height:46vh;overflow-y:auto;padding-right:4px}
 .ans-team-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);cursor:pointer;transition:all .25s;user-select:none;margin-bottom:7px}
@@ -317,8 +317,8 @@ audio.hidden-audio{display:none}
 <audio id="tile-audio" preload="none" class="hidden-audio"></audio>
 
 <!-- INTRO -->
-<div class="screen centered active" id="screen-intro">
-  <p class="eyebrow">🎂 День рождения · Quiz Night</p>
+<div class="screen centered active" id="screen-intro" style="justify-content:center;gap:0;padding:0">
+  <p class="eyebrow" style="margin-bottom:12px">🎂 День рождения</p>
   <h1 class="display">QUIZ<br>TIME</h1>
   <p class="subtitle">Три раунда. Один победитель. Много смеха.</p>
   <div class="rounds-preview">
@@ -335,9 +335,9 @@ audio.hidden-audio{display:none}
 
 <!-- QR -->
 <div class="screen centered" id="screen-qr">
-  <p class="eyebrow">📱 Подключение капитанов</p>
+  <p class="eyebrow">📱 Подключение игроков</p>
   <h2 class="qr-big">Отсканируй QR-код</h2>
-  <p class="qr-sub">Каждый капитан сканирует со своего телефона</p>
+  <p class="qr-sub">Каждый игрок сканирует со своего телефона</p>
   <div class="qr-wrap"><img id="qr-img" src="" alt="QR" width="200" height="200"></div>
   <p class="qr-url" id="qr-url-text"></p>
   <div class="qr-teams" id="qr-teams"></div>
@@ -472,7 +472,7 @@ var BG_MUSIC_VOLUME = 0.35;
 var TIMER_SECONDS   = 30;
 
 var r1data = [
-  {q:'Санька с волосами видели за твоим лицом? Вот сейчас увидели!', a:'Аркадий Укупник', hint:'', img:'images/photo_4.jpg', imgAnswer:'images/ans_4.jpg'},
+  {q:'Санька с волосами видели? Вот сейчас увидели!', a:'Аркадий Укупник', hint:'', img:'images/photo_4.jpg', imgAnswer:'images/ans_4.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Джаред Лето', hint:'', img:'images/photo_1.jpg', imgAnswer:'images/ans_1.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Сидни Суини', hint:'', img:'images/photo_2.jpg', imgAnswer:'images/ans_2.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Дженифер Лоуренс', hint:'', img:'images/photo_5.jpg', imgAnswer:'images/ans_5.jpg'},
@@ -512,7 +512,6 @@ var r3data = [
   {q:'Какой год на фотографии?', a:'В', hint:'', voiceFile:'', options:['2008','2010','2012','2014'], img:'images/photo_11.jpg'},
   {q:'Что из этого вообще не мое?', a:'В', hint:'', voiceFile:'', options:['Велосипед','Вейкборд','Скейтборд','Сноуборд']},
 ];
-
 
 /* ══ SUPABASE REALTIME ══ */
 var SUPABASE_URL = 'https://tdumnctlgdtscydmbxrg.supabase.co';
@@ -1190,10 +1189,20 @@ function renderPodium() {
 }
 
 /* ══ QR ══ */
+// Уникальный ID игровой сессии — генерируется один раз при загрузке страницы ведущего.
+// Встраивается в QR как ?game=xxx — участники используют его для идентификации сессии.
+var GAME_ID = (function() {
+  var stored = sessionStorage.getItem('quiz_game_id');
+  if (stored) return stored;
+  var id = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  sessionStorage.setItem('quiz_game_id', id);
+  return id;
+})();
+
 function setupQR() {
-  var href = window.location.href;
+  var href = window.location.href.split('?')[0]; // убираем старые параметры если есть
   var base = href.substring(0, href.lastIndexOf('/') + 1);
-  var url = base + 'captain.html';
+  var url = base + 'captain.html?game=' + GAME_ID;
   document.getElementById('qr-url-text').textContent = url;
   document.getElementById('qr-img').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url) + '&bgcolor=ffffff&color=07071a&margin=10';
 }
