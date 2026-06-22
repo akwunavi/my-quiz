@@ -731,11 +731,23 @@ function awardTilePoints(id) {
 // полный список из 25 имён занял бы весь экран
 function updateQScreenLive() {
   if (!currentQId) return;
+  // Обновляем счётчик на экране вопроса
   var container = document.getElementById('qlive-' + currentQId);
-  if (!container) return;
-  var answeredCount = Object.keys(liveAnswers).length;
-  var totalCount = participantOrder.length;
-  container.innerHTML = '<div class="q-live-counter">✅ Ответили: ' + answeredCount + ' / ' + totalCount + '</div>';
+  if (container) {
+    var answeredCount = Object.keys(liveAnswers).length;
+    var totalCount = participantOrder.length;
+    container.innerHTML = '<div class="q-live-counter">✅ Ответили: ' + answeredCount + ' / ' + totalCount + '</div>';
+  }
+  // Если экран ответа уже открыт — обновляем и его (ответы могут приходить после открытия)
+  if (currentAnswerQId) {
+    var aId = currentAnswerQId.replace('-q', '-a');
+    var ansParticipants = document.getElementById('ans-participants-' + aId);
+    if (ansParticipants) {
+      renderAnsParticipants(aId);
+      // Повторно начисляем за новые exact-совпадения (только те кого ещё не наградили)
+      autoAwardExactMatches(aId);
+    }
+  }
 }
 
 /* ══ AUDIO ══ */
@@ -942,10 +954,10 @@ function showAnswerScreen(qId, aId) {
 // тех, кто опечатался сильнее допуска или дал частичный ответ — кнопкой "Начислить".
 function autoAwardExactMatches(aId) {
   var screenEl = document.getElementById('screen-' + aId);
-  if (screenEl.dataset.autoAwarded === '1') return; // уже начисляли — не дублируем при повторном входе
   var round = screenEl.dataset.round;
   var awardedAny = false;
-  document.querySelectorAll('#ans-participants-' + aId + ' .auto-marked').forEach(function(row) {
+  // Начисляем только тем у кого класс auto-marked но НЕТ was-awarded (то есть ещё не получили балл)
+  document.querySelectorAll('#ans-participants-' + aId + ' .auto-marked:not(.was-awarded)').forEach(function(row) {
     var id = row.id.replace('atr-' + aId + '-', '');
     changeScore(id, 1, round);
     row.classList.remove('correct', 'auto-marked');
@@ -953,7 +965,6 @@ function autoAwardExactMatches(aId) {
     awardedAny = true;
   });
   if (awardedAny) {
-    screenEl.dataset.autoAwarded = '1';
     var note = document.querySelector('#screen-' + aId + ' .apply-note');
     if (note) note.textContent = '✅ Баллы за точные ответы начислены автоматически. Отметь вручную тех, кто ответил верно но с опечаткой.';
   }

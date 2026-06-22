@@ -33,7 +33,9 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 .name-hint{font-size:13px;color:var(--dim);margin-bottom:24px}
 
 /* ANSWER PAGE */
-.team-badge{display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:20px;border:1px solid;width:fit-content;margin-left:auto;margin-right:auto}
+.player-header{display:flex;align-items:center;justify-content:space-between;width:100%;padding:14px 20px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:24px;border-radius:16px}
+.player-name{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--mint)}
+.conn{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0}
 .q-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px;width:100%;text-align:center;margin-bottom:16px;min-height:70px;display:flex;align-items:center;justify-content:center}
 .q-box-text{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;line-height:1.4;color:var(--dim)}
 .q-box-text.active{color:var(--white)}
@@ -66,7 +68,6 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.err{background:rgba(248,113,113,.15);border-color:rgba(248,113,113,.4);color:var(--red)}
 
-.conn{position:fixed;top:14px;right:14px;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.2)}
 .conn.ok{background:var(--mint);box-shadow:0 0 8px var(--mint)}
 .conn.err{background:var(--red)}
 .cap-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;width:100%}
@@ -90,9 +91,19 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 
 <!-- ШАГ 3: ответы -->
 <div class="page" id="pg-answer">
-  <div class="team-badge" id="ans-badge"></div>
-  <div class="q-box"><p class="q-box-text" id="q-text">Ожидаем вопрос...</p></div>
 
+  <!-- Шапка с именем игрока -->
+  <div class="player-header">
+    <div class="player-name" id="player-name-display"></div>
+    <div class="conn" id="conn"></div>
+  </div>
+
+  <!-- Блок с текстом вопроса (скрыт пока нет вопроса) -->
+  <div class="q-box" id="q-box" style="display:none">
+    <p class="q-box-text" id="q-text"></p>
+  </div>
+
+  <!-- Ожидание вопроса -->
   <div id="state-wait" class="wait-box">
     <div class="wait-icon">⏳</div>
     <p class="wait-text">Ведущий ещё не открыл вопрос.<br>Жди — появится автоматически!</p>
@@ -176,6 +187,8 @@ function confirmName() {
   enterGame();
 }
 function enterGame() {
+  var nameEl = document.getElementById('player-name-display');
+  if (nameEl) nameEl.textContent = myName;
   showPage('pg-answer');
   connect();
 }
