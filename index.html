@@ -555,9 +555,34 @@ function ablyConnect() {
       sbChannel.send({ type: 'broadcast', event: 'current-question', payload: currentQId ? currentQPayload : null });
     });
 
-    sbChannel.subscribe();
-  } catch(e) { console.warn('Supabase:', e); }
+    sbChannel.subscribe(function(status) {
+      console.log('[Supabase host] status:', status);
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+        console.warn('[Supabase host] канал упал, переподключаемся через 3 сек...');
+        setTimeout(function() { ablyConnect(); }, 3000);
+      }
+    });
+  } catch(e) { console.warn('Supabase:', e); setTimeout(function(){ ablyConnect(); }, 5000); }
 }
+
+// Переподключение при возврате вкладки (ноут вышел из сна и т.д.)
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    if (!sbChannel || sbChannel.state !== 'joined') {
+      console.log('[Supabase host] вкладка снова активна, переподключаемся...');
+      ablyConnect();
+    }
+  }
+});
+window.addEventListener('online', function() { ablyConnect(); });
+
+// Фоновая проверка соединения каждые 15 сек
+setInterval(function() {
+  if (sbChannel && sbChannel.state && sbChannel.state !== 'joined' && sbChannel.state !== 'joining') {
+    console.log('[Supabase host] health-check: канал не joined, переподключаемся...');
+    ablyConnect();
+  }
+}, 15000);
 
 var currentQPayload = null; // храним полный пейлоад последнего открытого вопроса для повторной отправки при reconnect
 
