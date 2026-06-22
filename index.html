@@ -556,33 +556,40 @@ function ablyConnect() {
     });
 
     sbChannel.subscribe(function(status) {
-      console.log('[Supabase host] status:', status);
-      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-        console.warn('[Supabase host] канал упал, переподключаемся через 3 сек...');
-        setTimeout(function() { ablyConnect(); }, 3000);
+      if (status === 'SUBSCRIBED') {
+        hostReconnectAttempt = 0;
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+        scheduleHostReconnect();
       }
     });
-  } catch(e) { console.warn('Supabase:', e); setTimeout(function(){ ablyConnect(); }, 5000); }
+  } catch(e) { console.warn('Supabase:', e); scheduleHostReconnect(); }
 }
 
-// Переподключение при возврате вкладки (ноут вышел из сна и т.д.)
-document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'visible') {
-    if (!sbChannel || sbChannel.state !== 'joined') {
-      console.log('[Supabase host] вкладка снова активна, переподключаемся...');
-      ablyConnect();
-    }
-  }
-});
-window.addEventListener('online', function() { ablyConnect(); });
+var hostReconnectAttempt = 0;
+function scheduleHostReconnect() {
+  hostReconnectAttempt++;
+  var delay = Math.min(30000, 2000 * Math.pow(2, hostReconnectAttempt - 1)); // 2, 4, 8, 16, 30 сек
+  console.log('[Supabase host] переподключение через', delay/1000, 'сек (попытка', hostReconnectAttempt, ')');
+  setTimeout(function() {
+    if (sb && sbChannel) { try { sb.removeChannel(sbChannel); } catch(e){} }
+    ablyConnect();
+  }, delay);
+}
 
-// Фоновая проверка соединения каждые 15 сек
-setInterval(function() {
-  if (sbChannel && sbChannel.state && sbChannel.state !== 'joined' && sbChannel.state !== 'joining') {
-    console.log('[Supabase host] health-check: канал не joined, переподключаемся...');
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && sb && sbChannel && sbChannel.state !== 'joined') {
+    hostReconnectAttempt = 0;
     ablyConnect();
   }
-}, 15000);
+});
+window.addEventListener('online', function() { hostReconnectAttempt = 0; ablyConnect(); });
+
+setInterval(function() {
+  if (sbChannel && sbChannel.state && sbChannel.state !== 'joined' && sbChannel.state !== 'joining') {
+    hostReconnectAttempt = 0;
+    ablyConnect();
+  }
+}, 30000); // проверка раз в 30 сек, не 15
 
 var currentQPayload = null; // храним полный пейлоад последнего открытого вопроса для повторной отправки при reconnect
 
@@ -763,14 +770,13 @@ function updateQScreenLive() {
     var totalCount = participantOrder.length;
     container.innerHTML = '<div class="q-live-counter">✅ Ответили: ' + answeredCount + ' / ' + totalCount + '</div>';
   }
-  // Если экран ответа уже открыт — обновляем и его (ответы могут приходить после открытия)
+  // Если экран ответа уже открыт — обновляем только список участников
+  // НЕ вызываем autoAwardExactMatches здесь — только из showAnswerScreen
   if (currentAnswerQId) {
     var aId = currentAnswerQId.replace('-q', '-a');
     var ansParticipants = document.getElementById('ans-participants-' + aId);
     if (ansParticipants) {
-      renderAnsParticipants(aId);
-      // Повторно начисляем за новые exact-совпадения (только те кого ещё не наградили)
-      autoAwardExactMatches(aId);
+      onNewAnswerOnAnswerScreen(aId);
     }
   }
 }
@@ -966,11 +972,21 @@ var currentAnswerQId = null;
 function showAnswerScreen(qId, aId) {
   currentAnswerQId = qId;
   stopTimer();
+  // Принудительно обновляем счётчик перед переходом — на случай если ответы пришли
+  // пока соединение было нестабильным и счётчик не обновился в реальном времени
+  updateQScreenLive();
   hideAll();
   var next = document.getElementById('screen-' + aId);
   if (next) next.classList.add('active');
   renderAnsParticipants(aId);
-  autoAwardExactMatches(aId);
+  setTimeout(function() { autoAwardExactMatches(aId); }, 100);
+}
+
+// При поступлении нового ответа пока экран ответа открыт — обновляем список
+// и начисляем баллы за новые exact-совпадения с задержкой
+function onNewAnswerOnAnswerScreen(aId) {
+  renderAnsParticipants(aId);
+  setTimeout(function() { autoAwardExactMatches(aId); }, 100);
 }
 
 // Автоматически начисляет баллы всем, чей ответ распознан как ТОЧНОЕ совпадение
@@ -1006,7 +1022,6 @@ function renderAnsParticipants(aId) {
   var screenEl = document.getElementById('screen-' + aId);
   var correctAnswer = screenEl ? screenEl.dataset.correct : '';
   var round = screenEl ? parseInt(screenEl.dataset.round) : 1;
-  console.log('[DEBUG ans-check] aId=', aId, 'round=', round, 'correctAnswer="' + correctAnswer + '"');
 
   var answered = [];
   var notAnswered = [];
@@ -1025,7 +1040,6 @@ function renderAnsParticipants(aId) {
       // Раунд 3: точное совпадение буквы/текста ответа, без допуска на опечатки
       a.level = normalizeAnswer(a.answer) === normalizeAnswer(correctAnswer) ? 'exact' : 'none';
     }
-    console.log('[DEBUG ans-check]  ', a.name, 'answered="' + a.answer + '"', '-> level=', a.level);
   });
   var levelRank = { exact: 2, partial: 1, none: 0 };
   answered.sort(function(a, b) { return levelRank[b.level] - levelRank[a.level]; });
