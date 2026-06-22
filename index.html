@@ -472,7 +472,7 @@ var BG_MUSIC_VOLUME = 0.35;
 var TIMER_SECONDS   = 30;
 
 var r1data = [
-  {q:'Санька с волосами видели? Вот сейчас увидели!', a:'Аркадий Укупник', hint:'', img:'images/photo_4.jpg', imgAnswer:'images/ans_4.jpg'},
+  {q:'Санька с волосами видели за твоим лицом? Вот сейчас увидели!', a:'Аркадий Укупник', hint:'', img:'images/photo_4.jpg', imgAnswer:'images/ans_4.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Джаред Лето', hint:'', img:'images/photo_1.jpg', imgAnswer:'images/ans_1.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Сидни Суини', hint:'', img:'images/photo_2.jpg', imgAnswer:'images/ans_2.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Дженифер Лоуренс', hint:'', img:'images/photo_5.jpg', imgAnswer:'images/ans_5.jpg'},
@@ -512,6 +512,7 @@ var r3data = [
   {q:'Какой год на фотографии?', a:'В', hint:'', voiceFile:'', options:['2008','2010','2012','2014'], img:'images/photo_11.jpg'},
   {q:'Что из этого вообще не мое?', a:'В', hint:'', voiceFile:'', options:['Велосипед','Вейкборд','Скейтборд','Сноуборд']},
 ];
+
 
 /* ══ SUPABASE REALTIME ══ */
 var SUPABASE_URL = 'https://tdumnctlgdtscydmbxrg.supabase.co';
@@ -970,6 +971,7 @@ function renderAnsParticipants(aId) {
   var screenEl = document.getElementById('screen-' + aId);
   var correctAnswer = screenEl ? screenEl.dataset.correct : '';
   var round = screenEl ? parseInt(screenEl.dataset.round) : 1;
+  console.log('[DEBUG ans-check] aId=', aId, 'round=', round, 'correctAnswer="' + correctAnswer + '"');
 
   var answered = [];
   var notAnswered = [];
@@ -988,6 +990,7 @@ function renderAnsParticipants(aId) {
       // Раунд 3: точное совпадение буквы/текста ответа, без допуска на опечатки
       a.level = normalizeAnswer(a.answer) === normalizeAnswer(correctAnswer) ? 'exact' : 'none';
     }
+    console.log('[DEBUG ans-check]  ', a.name, 'answered="' + a.answer + '"', '-> level=', a.level);
   });
   var levelRank = { exact: 2, partial: 1, none: 0 };
   answered.sort(function(a, b) { return levelRank[b.level] - levelRank[a.level]; });
