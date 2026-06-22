@@ -77,7 +77,6 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 </head>
 <body>
 <div class="bg"></div>
-<div class="conn" id="conn"></div>
 
 <!-- ШАГ 1: вход — ввод имени -->
 <div class="page active" id="pg-name">
@@ -190,6 +189,7 @@ function enterGame() {
   var nameEl = document.getElementById('player-name-display');
   if (nameEl) nameEl.textContent = myName;
   showPage('pg-answer');
+  showWait(); // явно ставим экран ожидания до подключения
   connect();
 }
 function backToTeams() {
@@ -312,13 +312,15 @@ setInterval(function() {
 
 /* ── STATES ── */
 function showWait() {
-  document.getElementById('q-text').textContent = 'Ожидаем вопрос...';
-  document.getElementById('q-text').className = 'q-box-text';
+  var qbox = document.getElementById('q-box');
+  if (qbox) qbox.style.display = 'none';
   document.getElementById('state-wait').style.display = 'block';
   document.getElementById('state-input').style.display = 'none';
   document.getElementById('state-sent').style.display = 'none';
 }
 function showQ(text, options) {
+  var qbox = document.getElementById('q-box');
+  if (qbox) qbox.style.display = 'block';
   document.getElementById('q-text').textContent = text;
   document.getElementById('q-text').className = 'q-box-text active';
   if (hasSent) { showSent(document.getElementById('sent-text').textContent); return; }
