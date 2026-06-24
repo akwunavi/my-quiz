@@ -48,10 +48,11 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 .small-link{font-size:12px;color:var(--dim);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 
 /* WAIT / SENT */
-.wait-box{text-align:center;padding:16px 0}
-.wait-icon{font-size:36px;margin-bottom:10px;animation:pulse 1.5s ease infinite}
+.wait-box{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px;flex:1}
+.wait-icon{font-size:56px;margin-bottom:20px;animation:pulse 2s ease infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.wait-text{font-size:14px;color:var(--dim);line-height:1.7}
+.wait-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--white);margin-bottom:10px}
+.wait-text{font-size:14px;color:var(--dim);line-height:1.7;max-width:260px}
 .sent-box{background:rgba(16,245,160,.08);border:1px solid rgba(16,245,160,.25);border-radius:18px;padding:24px;text-align:center;width:100%;margin-bottom:14px}
 .sent-icon{font-size:36px;margin-bottom:8px}
 .sent-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--mint);margin-bottom:6px}
@@ -104,8 +105,9 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 
   <!-- Ожидание вопроса -->
   <div id="state-wait" class="wait-box">
-    <div class="wait-icon">⏳</div>
-    <p class="wait-text">Ведущий ещё не открыл вопрос.<br>Жди — появится автоматически!</p>
+    <div class="wait-icon">🎯</div>
+    <div class="wait-title">Ты в игре!</div>
+    <p class="wait-text">Жди вопрос от ведущего — он появится здесь автоматически</p>
   </div>
 
   <div id="state-input" style="display:none;width:100%">
@@ -124,7 +126,7 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
       <div class="sent-icon">✅</div>
       <div class="sent-title">Отправлено!</div>
       <div class="sent-ans">Твой ответ: <span id="sent-text"></span></div>
-      <p id="edit-hint" style="font-size:12px;color:var(--dim);margin-top:10px">Можно изменить ответ ниже ⤵</p>
+      <p id="edit-hint" style="font-size:12px;color:var(--dim);margin-top:10px;display:none">Можно изменить ответ ниже ⤵</p>
     </div>
     <div id="edit-area" style="width:100%"></div>
   </div>
@@ -235,6 +237,34 @@ function connect() {
     });
     ch.on('broadcast', { event: 'question-close' }, function(){
       currentQ = null; lastKnownQId = null; showWait();
+    });
+    ch.on('broadcast', { event: 'final-results' }, function(payload) {
+      var results = payload.payload && payload.payload.results;
+      if (!results || !myId || !results[myId]) return;
+      var r = results[myId];
+      var medals = { 1: '🥇', 2: '🥈', 3: '🥉' };
+      var medal = medals[r.place] || ('#' + r.place);
+      var isWinner = r.place === 1;
+      var qbox = document.getElementById('q-box');
+      if (qbox) qbox.style.display = 'none';
+      document.getElementById('state-wait').style.display = 'none';
+      document.getElementById('state-input').style.display = 'none';
+      document.getElementById('state-sent').style.display = 'none';
+      // Показываем финальный результат
+      var existing = document.getElementById('state-final');
+      if (!existing) {
+        var div = document.createElement('div');
+        div.id = 'state-final';
+        div.style.cssText = 'width:100%;text-align:center;padding:24px 0';
+        document.getElementById('pg-answer').appendChild(div);
+      }
+      document.getElementById('state-final').innerHTML =
+        '<div style="font-size:72px;margin-bottom:16px;animation:bounce 1s ease infinite alternate">' + medal + '</div>' +
+        '<div style="font-family:\'Syne\',sans-serif;font-size:28px;font-weight:800;color:' + (isWinner ? 'var(--gold)' : 'var(--white)') + ';margin-bottom:8px">' +
+          (isWinner ? 'Победитель!' : r.place + ' место') +
+        '</div>' +
+        '<div style="font-size:16px;color:var(--dim);margin-bottom:24px">' + r.pts + ' очков из ' + r.total + ' участников</div>' +
+        '<div style="font-size:14px;color:var(--mint);line-height:1.7">Спасибо за участие<br>в квизе! 🎂</div>';
     });
     ch.on('broadcast', { event: 'answers-locked' }, function(){
       var hint = document.getElementById('edit-hint');

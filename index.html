@@ -69,7 +69,8 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 .q-num-badge{position:absolute;top:20px;left:20px;background:rgba(7,7,26,.75);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:600;color:var(--dim);letter-spacing:2px}
 
 .q-text-side{display:flex;flex-direction:column;justify-content:space-between;padding:28px 28px 28px 28px;background:linear-gradient(135deg,rgba(7,7,26,.99),rgba(13,13,43,.99));overflow-y:auto}
-.r3 .q-text-side{background:transparent;padding:0;width:100%;max-width:720px;margin:0 auto}
+.r3 .q-text-side{background:transparent;padding:60px 80px;width:100%;max-width:100%;margin:0 auto;justify-content:center}
+.q-screen.active.r3{display:flex;flex-direction:column}
 
 /* BIG TIMER centered */
 .q-timer-block{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0 16px}
@@ -144,7 +145,7 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 .ans-buttons{display:flex;flex-direction:row;gap:10px;margin-top:8px;align-items:center}
 .apply-btn-inline{padding:13px 20px;border-radius:100px;border:none;background:linear-gradient(135deg,var(--mint),#059669);color:#07071a;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;white-space:nowrap}
 .apply-btn-inline:hover:not(:disabled){opacity:.85}
-.no-img .ans-text-side{flex:1;max-width:720px;width:100%;margin:0 auto;justify-content:flex-start;padding-top:80px}
+.no-img .ans-text-side{flex:1;width:100%;max-width:100%;margin:0 auto;justify-content:center;padding:60px 80px}
 /* Варианты ответа */
 .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
 .opt-item{border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);padding:12px 16px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:10px;transition:all .4s;color:rgba(255,255,255,.35)}
@@ -279,7 +280,11 @@ audio.hidden-audio{display:none}
 .modal-close:hover{background:rgba(255,255,255,.15);color:var(--white)}
 
 /* ── FINAL ── */
-.final-emoji{font-size:64px;margin-bottom:18px;animation:bounce 1s ease infinite alternate}
+.lb-winner{border-color:rgba(245,158,11,.6)!important;background:rgba(245,158,11,.1)!important;box-shadow:0 0 24px rgba(245,158,11,.2)}
+.pie-wrap{display:flex;align-items:center;justify-content:center;gap:32px;padding:16px 0;flex-wrap:wrap}
+.pie-stats{display:flex;flex-direction:column;gap:16px}
+.pie-stat{display:flex;flex-direction:column;align-items:center;gap:4px}
+.pie-label{font-size:12px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px}
 @keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-10px)}}
 .final-title{font-family:'Syne',sans-serif;font-size:clamp(32px,6vw,68px);font-weight:800;background:linear-gradient(90deg,var(--gold),var(--purple),var(--mint));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:10px}
 
@@ -319,8 +324,8 @@ audio.hidden-audio{display:none}
 <!-- INTRO -->
 <div class="screen centered active" id="screen-intro" style="justify-content:center;gap:0;padding:0">
   <p class="eyebrow" style="margin-bottom:12px">🎂 День рождения</p>
-  <h1 class="display">QUIZ<br>TIME</h1>
-  <p class="subtitle">Три раунда. Один победитель. Много смеха.</p>
+  <h1 class="display">IVAN<br>QUIZ<br>TIME</h1>
+  <p class="subtitle">Три раунда. Отдыхаем. Веселимся.</p>
   <div class="rounds-preview">
     <div class="round-pill">🖼️ Раунд 1 — Картинки</div>
     <div class="round-pill">🎵 Раунд 2 — Музыка</div>
@@ -374,7 +379,7 @@ audio.hidden-audio{display:none}
   <p class="round-badge">🖼️ Раунд первый</p>
   <div class="line" style="color:var(--gold)"></div>
   <h2 class="round-title">КАР-<br>ТИН-<br>КИ</h2>
-  <p class="round-desc">Угадай кто или что на фото. Каждый правильный ответ — 1 балл.</p>
+  <p class="round-desc">Вы увидите 10 картинок звезд, скрытых за вашими лицами. Надо понять что за звезда спряталась. Каждый правильный ответ — 1 балл.</p>
   <button class="btn btn-gold" onclick="goTo('r1-q1')">Начать раунд →</button>
 </div>
 <div id="r1-questions"></div>
@@ -386,7 +391,7 @@ audio.hidden-audio{display:none}
   <p class="round-badge">🎵 Раунд второй</p>
   <div class="line" style="color:var(--mint)"></div>
   <h2 class="round-title">МУ-<br>ЗЫ-<br>КА</h2>
-  <p class="round-desc">Своя игра — выбирай тему и сложность. Отвечают по очереди.</p>
+  <p class="round-desc">Своя игра — выбирай тему и сложность. Отвечаем на скорость. Кто первый правильно ответит - заберет баллы.</p>
   <button class="btn btn-mint" onclick="goTo('r2-board')">Открыть доску →</button>
 </div>
 
@@ -458,30 +463,30 @@ audio.hidden-audio{display:none}
 
 <!-- FINAL -->
 <div class="screen centered" id="screen-final">
-  <div class="final-emoji">🏆</div>
-  <h2 class="final-title">Квиз<br>Завершён!</h2>
-  <p class="final-sub">Итоговые баллы команд</p>
-  <div class="podium" id="podium"></div>
+  <p class="lb-eye" id="final-eye">🏆 ФИНАЛЬНЫЕ ИТОГИ</p>
+  <h2 class="lb-title" style="background:linear-gradient(90deg,var(--gold),var(--purple),var(--mint));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Квиз<br>Завершён!</h2>
+  <div class="lb-list" id="podium" style="max-width:680px"></div>
+  <button class="btn btn-primary lb-continue" id="final-continue-btn" style="display:none;max-width:320px" onclick="sendFinalResults()">🎉 Показать результат игрокам</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ══ ✏️ ДАННЫЕ ══ */
-var BG_MUSIC_FILE   = 'music/bg_timer.mp3';
+var BG_MUSIC_FILE   = 'music/song.mp3';
 var BG_MUSIC_VOLUME = 0.35;
 var TIMER_SECONDS   = 30;
 
 var r1data = [
   {q:'Санька с волосами видели? Вот сейчас увидели!', a:'Аркадий Укупник', hint:'', img:'images/photo_4.jpg', imgAnswer:'images/ans_4.jpg'},
-  {q:'Кто это тут спрятался за твоим лицом?', a:'Джаред Лето', hint:'', img:'images/photo_1.jpg', imgAnswer:'images/ans_1.jpg'},
+  {q:'Кто это тут спрятался за твоим лицом?', a:'Мэрелин Монро', hint:'', img:'images/photo_9.jpg', imgAnswer:'images/ans_9.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Сидни Суини', hint:'', img:'images/photo_2.jpg', imgAnswer:'images/ans_2.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Дженифер Лоуренс', hint:'', img:'images/photo_5.jpg', imgAnswer:'images/ans_5.jpg'},
+  {q:'Кто это тут спрятался за твоим лицом?', a:'Брэд Питт', hint:'', img:'images/photo_1.jpg', imgAnswer:'images/ans_1.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Анжелика Варум', hint:'', img:'images/photo_6.jpg', imgAnswer:'images/ans_6.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Сергей Лазарев', hint:'', img:'images/photo_3.jpg', imgAnswer:'images/ans_3.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Меган Фокс', hint:'', img:'images/photo_7.jpg', imgAnswer:'images/ans_7.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Кристина Агилера', hint:'', img:'images/photo_8.jpg', imgAnswer:'images/ans_8.jpg'},
-  {q:'Кто это тут спрятался за твоим лицом?', a:'✏️ Ответ 9', hint:'', img:'images/photo_9.jpg', imgAnswer:'images/ans_9.jpg'},
-  {q:'Кто это тут спрятался за твоим лицом?', a:'✏️ Ответ 10', hint:'Последний!', img:'images/photo_10.jpg', imgAnswer:'images/ans_10.jpg'},
+  {q:'Кто это тут спрятался за твоим лицом?', a:'Чарли XCX', hint:'Последний!', img:'images/photo_10.jpg', imgAnswer:'images/ans_10.jpg'},
 ];
 
 var categories = [
@@ -493,26 +498,25 @@ var categories = [
 ];
 
 var musicData = {
-  0:{'0.5':{q:'Угадай трек',a:'Сплин',file:'music/song_1_1.mp3'},'1':{q:'Угадай трек',a:'МумийТролль',file:'music/song_1_2.mp3'},'1.5':{q:'Угадай трек',a:'7Б',file:'music/song_1_3.mp3'},'2':{q:'Угадай трек',a:'LOUNA',file:'music/song_1_4.mp3'}},
-  1:{'0.5':{q:'Угадай трек',a:'ВиаГра',file:'music/song_2_1.mp3'},'1':{q:'Угадай трек',a:'Madonna',file:'music/song_2_2.mp3'},'1.5':{q:'Угадай трек',a:'Иванушки int',file:'music/song_2_3.mp3'},'2':{q:'Угадай трек',a:'Джордж Майкл',file:'music/song_2_4.mp3'}},
-  2:{'0.5':{q:'Угадай трек',a:'CREAM SODA',file:'music/song_3_1.mp3'},'1':{q:'Угадай трек',a:'BAD OMENS',file:'music/song_3_2.mp3'},'1.5':{q:'Угадай трек',a:'Линда',file:'music/song_3_3.mp3'},'2':{q:'Угадай трек',a:'Teriyaki Boyz',file:'music/song_3_4.mp3'}},
-  3:{'0.5':{q:'Угадай трек',a:'Ирина Аллегрова',file:'music/song_4_1.mp3'},'1':{q:'Угадай трек',a:'Scorpions',file:'music/song_4_2.mp3'},'1.5':{q:'Угадай трек',a:'Sher',file:'music/song_4_3.mp3'},'2':{q:'Угадай трек',a:'Кар-мен',file:'music/song_4_4.mp3'}},
-  4:{'0.5':{q:'Угадай трек',a:'Linkin Park',file:'music/song_5_1.mp3'},'1':{q:'Угадай трек',a:'Charli XCX',file:'music/song_5_2.mp3'},'1.5':{q:'Угадай трек',a:'E-type',file:'music/song_5_3.mp3'},'2':{q:'Угадай трек',a:'Foals',file:'music/song_5_4.mp3'}},
+  0:{'0.5':{q:'Угадай исполнителя',a:'Сплин',file:'music/song_1_1.mp3'},'1':{q:'Угадай исполнителя',a:'МумийТролль',file:'music/song_1_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'7Б',file:'music/song_1_3.mp3'},'2':{q:'Угадай исполнителя',a:'LOUNA',file:'music/song_1_4.mp3'}},
+  1:{'0.5':{q:'Угадай исполнителя',a:'ВиаГра',file:'music/song_2_1.mp3'},'1':{q:'Угадай исполнителя',a:'Madonna',file:'music/song_2_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'Иванушки int',file:'music/song_2_3.mp3'},'2':{q:'Угадай исполнителя',a:'Джордж Майкл',file:'music/song_2_4.mp3'}},
+  2:{'0.5':{q:'Угадай исполнителя',a:'CREAM SODA',file:'music/song_3_1.mp3'},'1':{q:'Угадай исполнителя',a:'BAD OMENS',file:'music/song_3_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'Линда',file:'music/song_3_3.mp3'},'2':{q:'Угадай исполнителя',a:'Teriyaki Boyz',file:'music/song_3_4.mp3'}},
+  3:{'0.5':{q:'Угадай исполнителя',a:'Ирина Аллегрова',file:'music/song_4_1.mp3'},'1':{q:'Угадай исполнителя',a:'Scorpions',file:'music/song_4_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'Sher',file:'music/song_4_3.mp3'},'2':{q:'Угадай исполнителя',a:'Кар-мен',file:'music/song_4_4.mp3'}},
+  4:{'0.5':{q:'Угадай исполнителя',a:'Linkin Park',file:'music/song_5_1.mp3'},'1':{q:'Угадай исполнителя',a:'Charli XCX',file:'music/song_5_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'E-type',file:'music/song_5_3.mp3'},'2':{q:'Угадай исполнителя',a:'Foals',file:'music/song_5_4.mp3'}},
 };
 
 var r3data = [
   {q:'От чего я никогда не откажусь на завтрак?', a:'А', hint:'', voiceFile:'', options:['Круассанчик','Манная каша','Игристое','Чай с молоком']},
-  {q:'На каком фестивале я не был?', a:'В', hint:'', voiceFile:'', options:['Нашествие','Signal','Предвкушение','Один']},
+  {q:'Какой год на фотографии?', a:'В', hint:'', voiceFile:'', options:['2008','2010','2012','2014'], img:'images/photo_11.jpg'},
   {q:'Какой мой любимый фильм?', a:'Б', hint:'', voiceFile:'', options:['Хокум','Начало','Титаник','Поймай меня, если сможешь']},
-  {q:'Моя "рэдфлаг" - это когда кто-то:', a:'В', hint:'я на все злюсь, но на один чуть больше', voiceFile:'', options:['Тупит как черт','Орет как тварь','Опаздывает','Набухался']},
+  {q:'Мой "рэдфлаг" - это когда кто-то:', a:'В', hint:'я на все злюсь, но на один чуть больше', voiceFile:'', options:['Тупит как черт','Орет как тварь','Опаздывает','Набухался']},
   {q:'Мой идеальный отпуск - это:', a:'Б', hint:'', voiceFile:'', options:['Лежать и ничего не делать на шезлонге','Носиться как ёбик по достопримечательностям','Гастротур','Спать']},
   {q:'Какой вид выпечки у меня никогда не получался?', a:'Г', hint:'', voiceFile:'', options:['Багет','Морковный торт','Пирожки','Макаруны']},
-  {q:'Какой год на фотографии', a:'Б', hint:'', voiceFile:'', options:['1990','1992','1994','1996'], img:'images/photo_11.jpg'},
+  {q:'В какой стране я не был?', a:'В', hint:'', voiceFile:'', options:['Грузия','Азербайджан','Армения','Индия']},
   {q:'Любимый алкогольный напиток', a:'Г', hint:'', voiceFile:'', options:['Пиво','Водка','Игристое','Белое вино']},
-  {q:'Какой год на фотографии?', a:'В', hint:'', voiceFile:'', options:['2008','2010','2012','2014'], img:'images/photo_11.jpg'},
-  {q:'Что из этого вообще не мое?', a:'В', hint:'', voiceFile:'', options:['Велосипед','Вейкборд','Скейтборд','Сноуборд']},
+  {q:'Любимая серия книг?', a:'В', hint:'', voiceFile:'', options:['Харри Холе','50 оттенков серого','Гарри Поттер','Золотой компас']},
+  {q:'Какой год на фотографии?', a:'Б', hint:'', voiceFile:'', options:['1990','1992','1994','1996'], img:'images/photo_12.jpg'},
 ];
-
 /* ══ SUPABASE REALTIME ══ */
 var SUPABASE_URL = 'https://tdumnctlgdtscydmbxrg.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_lCYRT_995HnSgMTpesu9lQ_3JAAabNl';
@@ -953,10 +957,10 @@ function buildQuestions(data, round, nextScreen) {
         ) +
         optionsHtml +
         '<div class="ans-participants" id="ans-participants-' + aId + '" style="margin-top:18px"></div>' +
-        '<p class="apply-note">Нажми на участника чтобы отметить ✅ (зелёная галочка — похоже на правильный ответ)</p>' +
+        (round === 1 ? '<p class="apply-note">Нажми на участника чтобы отметить ✅ (зелёная галочка — похоже на правильный ответ)</p>' : '') +
         '<div class="ans-buttons">' +
           '<button class="btn btn-secondary" onclick="returnToQuestion(\'' + qId + '\',\'' + aId + '\')">← Назад</button>' +
-          '<button class="apply-btn-inline" id="apply-btn-' + aId + '" onclick="applyPoints(\'' + aId + '\')">🏆 Начислить</button>' +
+          (round === 1 ? '<button class="apply-btn-inline" id="apply-btn-' + aId + '" onclick="applyPoints(\'' + aId + '\')">🏆 Начислить</button>' : '') +
           '<button class="btn ' + nextClass + '" id="next-btn-' + aId + '" onclick="' + nextOnClick + '">' + nextLabel + '</button>' +
         '</div>' +
       '</div></div>';
@@ -1037,10 +1041,57 @@ function renderAnsParticipants(aId) {
     if (round === 1) {
       a.level = matchLevel(a.answer, correctAnswer);
     } else {
-      // Раунд 3: точное совпадение буквы/текста ответа, без допуска на опечатки
       a.level = normalizeAnswer(a.answer) === normalizeAnswer(correctAnswer) ? 'exact' : 'none';
     }
   });
+
+  // Раунд 3 — показываем круговую диаграмму вместо списка
+  if (round === 3) {
+    var correct = answered.filter(function(a) { return a.level === 'exact'; }).length;
+    var total = participantOrder.length;
+    var pct = total > 0 ? Math.round(correct / total * 100) : 0;
+    var radius = 80, cx = 100, cy = 100;
+    var circ = 2 * Math.PI * radius;
+    var dash = circ * pct / 100;
+    var color = pct >= 70 ? '#10F5A0' : pct >= 40 ? '#F59E0B' : '#f87171';
+
+    // Помечаем exact-ответы для автоначисления
+    answered.forEach(function(a) {
+      if (a.level === 'exact') {
+        var row = document.getElementById('atr-' + aId + '-' + a.id);
+        if (row) row.classList.add('auto-marked');
+      }
+    });
+
+    container.innerHTML =
+      '<div class="pie-wrap">' +
+        '<svg width="200" height="200" viewBox="0 0 200 200">' +
+          '<circle cx="' + cx + '" cy="' + cy + '" r="' + radius + '" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="18"/>' +
+          '<circle cx="' + cx + '" cy="' + cy + '" r="' + radius + '" fill="none" stroke="' + color + '" stroke-width="18"' +
+            ' stroke-dasharray="' + dash + ' ' + circ + '"' +
+            ' stroke-dashoffset="' + (circ / 4) + '"' +
+            ' stroke-linecap="round"' +
+            ' style="transition:stroke-dasharray 1s ease"/>' +
+          '<text x="' + cx + '" y="' + (cy - 6) + '" text-anchor="middle" fill="' + color + '" font-family="Syne,sans-serif" font-size="32" font-weight="800">' + pct + '%</text>' +
+          '<text x="' + cx + '" y="' + (cy + 18) + '" text-anchor="middle" fill="rgba(255,255,255,.4)" font-family="sans-serif" font-size="12">угадали</text>' +
+        '</svg>' +
+        '<div class="pie-stats">' +
+          '<div class="pie-stat"><span style="color:' + color + ';font-size:28px;font-weight:800">' + correct + '</span><span class="pie-label">верно</span></div>' +
+          '<div class="pie-stat"><span style="color:rgba(255,255,255,.3);font-size:28px;font-weight:800">' + (total - correct) + '</span><span class="pie-label">неверно</span></div>' +
+        '</div>' +
+      '</div>';
+
+    // Скрытые строки для autoAwardExactMatches (не показываем, но они нужны для логики начисления)
+    var hidden = '<div style="display:none">' +
+      answered.filter(function(a){ return a.level === 'exact'; }).map(function(a) {
+        return '<div class="ans-team-row auto-marked" id="atr-' + aId + '-' + a.id + '"></div>';
+      }).join('') +
+    '</div>';
+    container.innerHTML += hidden;
+    return;
+  }
+
+  // Раунд 1 — обычный список
   var levelRank = { exact: 2, partial: 1, none: 0 };
   answered.sort(function(a, b) { return levelRank[b.level] - levelRank[a.level]; });
 
@@ -1049,8 +1100,6 @@ function renderAnsParticipants(aId) {
     html += answered.map(function(a) {
       var tagHtml = a.level === 'exact' ? ' <span class="auto-tag">✓ верно</span>'
         : a.level === 'partial' ? ' <span class="auto-tag partial-tag">частично похоже</span>' : '';
-      // exact-совпадения сразу отмечаем как "correct" — баллы за них будут начислены
-      // автоматически кнопкой "Начислить" без необходимости кликать по каждому вручную
       var rowClass = a.level === 'exact' ? ' suggest-correct correct auto-marked' : a.level === 'partial' ? ' partial-match' : '';
       return '<div class="ans-team-row' + rowClass + '" id="atr-' + aId + '-' + a.id + '" onclick="toggleParticipant(\'' + aId + '\',\'' + a.id + '\')">' +
         '<div class="ans-chk"></div>' +
@@ -1228,14 +1277,67 @@ function startQuiz() { goTo('r1-intro'); }
 
 /* ══ FINAL ══ */
 function renderPodium() {
+  // Музыка финала — используем фоновый трек таймера или отдельный файл если есть
+  try {
+    var fin = new Audio('music/song.mp3');
+    fin.volume = 0.5;
+    fin.play().catch(function() {
+      // Если final.mp3 нет — включаем фоновый трек
+      var bg = document.getElementById('bg-music');
+      if (bg) { bg.volume = 0.4; bg.play(); }
+    });
+  } catch(e) {
+    var bg = document.getElementById('bg-music');
+    if (bg) { bg.volume = 0.4; bg.play(); }
+  }
   var sorted = participantOrder.map(function(id) {
-    return { name: participants[id].name, pts: participants[id].pts, c: colorFor(id) };
+    return { id: id, name: participants[id].name, pts: participants[id].pts, c: colorFor(id) };
   }).sort(function(a, b) { return b.pts - a.pts; });
-  document.getElementById('podium').innerHTML = sorted.map(function(t, i) {
-    return '<div class="podium-row"><div class="podium-rank">' + (['🥇', '🥈', '🥉'][i] || ('#' + (i+1))) + '</div>' +
-      '<div class="podium-name" style="color:' + t.c + '">' + t.name + '</div>' +
-      '<div class="podium-pts" style="color:' + t.c + '">' + t.pts + ' очков</div></div>';
+
+  var list = document.getElementById('podium');
+  var continueBtn = document.getElementById('final-continue-btn');
+  continueBtn.style.display = 'none';
+
+  list.innerHTML = sorted.map(function(t, i) {
+    var place = i + 1;
+    var medal = place === 1 ? '🥇' : place === 2 ? '🥈' : place === 3 ? '🥉' : ('#' + place);
+    var isWinner = place === 1;
+    return '<div class="lb-row' + (isWinner ? ' lb-winner' : '') + '" id="final-row-' + i + '" style="opacity:0;transform:translateY(16px)">' +
+      '<span class="lb-place">' + medal + '</span>' +
+      '<span class="lb-name" style="color:' + t.c + '">' + t.name + '</span>' +
+      '<span class="lb-pts">' + t.pts + '</span>' +
+    '</div>';
   }).join('');
+
+  // Анимация снизу вверх, 0.4 сек на участника
+  var n = sorted.length;
+  for (var i = n - 1; i >= 0; i--) {
+    (function(idx) {
+      setTimeout(function() {
+        var row = document.getElementById('final-row-' + idx);
+        if (row) { row.style.opacity = '1'; row.style.transform = 'translateY(0)'; row.style.transition = 'opacity .5s ease, transform .5s ease'; }
+        if (idx === 0) {
+          setTimeout(function(){ continueBtn.style.display = 'inline-flex'; }, 600);
+        }
+      }, (n - 1 - idx) * 400);
+    })(i);
+  }
+}
+
+function sendFinalResults() {
+  // Отправляем каждому игроку его место и баллы
+  var sorted = participantOrder.map(function(id) {
+    return { id: id, name: participants[id].name, pts: participants[id].pts };
+  }).sort(function(a, b) { return b.pts - a.pts; });
+
+  var results = {};
+  sorted.forEach(function(p, i) { results[p.id] = { place: i + 1, pts: p.pts, total: sorted.length }; });
+
+  if (sbChannel) {
+    sbChannel.send({ type: 'broadcast', event: 'final-results', payload: { results: results } });
+  }
+  document.getElementById('final-continue-btn').textContent = '✅ Результаты отправлены!';
+  document.getElementById('final-continue-btn').disabled = true;
 }
 
 /* ══ QR ══ */
