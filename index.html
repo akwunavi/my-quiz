@@ -308,6 +308,7 @@ audio.hidden-audio{display:none}
 </head>
 <body>
 <div class="stars"></div>
+<button id="host-reconnect-btn" onclick="manualHostReconnect()" style="display:none;position:fixed;bottom:20px;right:20px;z-index:9999;align-items:center;gap:8px;padding:12px 18px;border-radius:100px;border:1px solid var(--red);background:rgba(248,113,113,.15);color:var(--red);font-size:13px;font-weight:600;cursor:pointer;backdrop-filter:blur(10px)">🔄 Связь потеряна — переподключиться</button>
 <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
 <nav class="nav" id="nav" style="display:none">
   <span class="nav-dot" id="dot-0"></span>
@@ -325,7 +326,7 @@ audio.hidden-audio{display:none}
 <div class="screen centered active" id="screen-intro" style="justify-content:center;gap:0;padding:0">
   <p class="eyebrow" style="margin-bottom:12px">🎂 День рождения</p>
   <h1 class="display">IVAN<br>QUIZ<br>TIME</h1>
-  <p class="subtitle">Три раунда. Отдыхаем. Веселимся.</p>
+  <p class="subtitle">Три раунда. Отдыхаем. Веселимся..</p>
   <div class="rounds-preview">
     <div class="round-pill">🖼️ Раунд 1 — Картинки</div>
     <div class="round-pill">🎵 Раунд 2 — Музыка</div>
@@ -517,14 +518,57 @@ var r3data = [
   {q:'Любимая серия книг?', a:'В', hint:'', voiceFile:'', options:['Харри Холе','50 оттенков серого','Гарри Поттер','Золотой компас']},
   {q:'Какой год на фотографии?', a:'Б', hint:'', voiceFile:'', options:['1990','1992','1994','1996'], img:'images/photo_12.jpg'},
 ];
-/* ══ SUPABASE REALTIME ══ */
+
+/* ══ SUPABASE REST API (без WebSocket — работает без VPN) ══ */
 var SUPABASE_URL = 'https://tdumnctlgdtscydmbxrg.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_lCYRT_995HnSgMTpesu9lQ_3JAAabNl';
-var sb, sbChannel, currentQId = null, liveAnswers = {};
+var REST_URL = SUPABASE_URL + '/rest/v1';
+var REST_HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json'
+};
+var currentQId = null, liveAnswers = {};
 
+// Уникальный ID игровой сессии — генерируется один раз при загрузке.
+// Встраивается в QR как ?game=xxx, участники используют его для синхронизации.
+var GAME_ID = (function() {
+  var stored = sessionStorage.getItem('quiz_game_id');
+  if (stored) return stored;
+  var id = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  sessionStorage.setItem('quiz_game_id', id);
+  return id;
+})();
+
+// Записать/обновить состояние игры в таблицу game_state
+// Используем upsert по game_id (одна строка на игру)
+function restSetGameState(state) {
+  return fetch(REST_URL + '/game_state?on_conflict=game_id', {
+    method: 'POST',
+    headers: Object.assign({}, REST_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+    body: JSON.stringify(state)
+  }).catch(function(e){ console.warn('restSetGameState error:', e); });
+}
+
+// Прочитать все ответы на текущий вопрос
+function restGetAnswers(gameId, qId) {
+  var url = REST_URL + '/answers?game_id=eq.' + encodeURIComponent(gameId) + '&q_id=eq.' + encodeURIComponent(qId) + '&select=*';
+  return fetch(url, { headers: REST_HEADERS })
+    .then(function(r){ return r.json(); })
+    .catch(function(e){ console.warn('restGetAnswers error:', e); return []; });
+}
+
+/* ══ SUPABASE REALTIME (оставлен для участников-join, но не критичен) ══ */
+var sb, sbChannel;
+
+var hostReconnecting = false;
 function ablyConnect() {
+  if (hostReconnecting) return;     // защита от параллельных переподключений
+  hostReconnecting = true;
   try {
-    if (typeof supabase === 'undefined') { console.warn('Supabase не загрузился'); return; }
+    if (typeof supabase === 'undefined') { console.warn('Supabase не загрузился'); hostReconnecting = false; return; }
+    // Убиваем старый канал перед созданием нового
+    if (sbChannel && sb) { try { sb.removeChannel(sbChannel); } catch(e){} sbChannel = null; }
     sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     sbChannel = sb.channel('quiz-room', { config: { broadcast: { self: false } } });
 
@@ -561,50 +605,112 @@ function ablyConnect() {
 
     sbChannel.subscribe(function(status) {
       if (status === 'SUBSCRIBED') {
+        hostReconnecting = false;
         hostReconnectAttempt = 0;
+        updateHostReconnectBtn(false);
       } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+        hostReconnecting = false;
+        updateHostReconnectBtn(true);
         scheduleHostReconnect();
       }
     });
-  } catch(e) { console.warn('Supabase:', e); scheduleHostReconnect(); }
+  } catch(e) { console.warn('Supabase:', e); hostReconnecting = false; updateHostReconnectBtn(true); scheduleHostReconnect(); }
 }
 
 var hostReconnectAttempt = 0;
+var hostReconnectTimer = null;
 function scheduleHostReconnect() {
+  if (hostReconnectTimer) clearTimeout(hostReconnectTimer);
   hostReconnectAttempt++;
-  var delay = Math.min(30000, 2000 * Math.pow(2, hostReconnectAttempt - 1)); // 2, 4, 8, 16, 30 сек
-  console.log('[Supabase host] переподключение через', delay/1000, 'сек (попытка', hostReconnectAttempt, ')');
-  setTimeout(function() {
-    if (sb && sbChannel) { try { sb.removeChannel(sbChannel); } catch(e){} }
-    ablyConnect();
+  var delay = Math.min(15000, 2000 * Math.pow(2, hostReconnectAttempt - 1)); // 2,4,8,15 сек макс
+  hostReconnectTimer = setTimeout(function() {
+    hostReconnectTimer = null;
+    if (!hostReconnecting) ablyConnect();
   }, delay);
 }
 
-document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'visible' && sb && sbChannel && sbChannel.state !== 'joined') {
-    hostReconnectAttempt = 0;
-    ablyConnect();
-  }
-});
-window.addEventListener('online', function() { hostReconnectAttempt = 0; ablyConnect(); });
+// Ручная кнопка переподключения для ведущего
+function manualHostReconnect() {
+  if (hostReconnectTimer) { clearTimeout(hostReconnectTimer); hostReconnectTimer = null; }
+  hostReconnectAttempt = 0;
+  hostReconnecting = false;
+  ablyConnect();
+}
 
-setInterval(function() {
-  if (sbChannel && sbChannel.state && sbChannel.state !== 'joined' && sbChannel.state !== 'joining') {
-    hostReconnectAttempt = 0;
-    ablyConnect();
-  }
-}, 30000); // проверка раз в 30 сек, не 15
+function updateHostReconnectBtn(show) {
+  var btn = document.getElementById('host-reconnect-btn');
+  if (btn) btn.style.display = show ? 'flex' : 'none';
+}
 
-var currentQPayload = null; // храним полный пейлоад последнего открытого вопроса для повторной отправки при reconnect
+var currentQPayload = null;
+var answerPollTimer = null;
 
 function publishQuestion(id, text, activeTeam, options) {
   currentQId = id; liveAnswers = {}; answersOrder = [];
   currentQPayload = { id: id, text: text, activeTeam: activeTeam, options: options || null };
-  if (sbChannel) sbChannel.send({ type: 'broadcast', event: 'question-open', payload: currentQPayload });
+  // Пишем состояние в БД через REST — игроки прочитают его поллингом
+  restSetGameState({
+    game_id: GAME_ID,
+    phase: 'question',
+    current_q_id: id,
+    question_text: text,
+    options: options || null,
+    updated_at: new Date().toISOString()
+  });
+  // Запускаем поллинг ответов
+  startAnswerPolling();
 }
+
 function closeQuestion() {
   currentQId = null; currentQPayload = null;
-  if (sbChannel) sbChannel.send({ type: 'broadcast', event: 'question-close', payload: {} });
+  restSetGameState({
+    game_id: GAME_ID,
+    phase: 'waiting',
+    current_q_id: null,
+    question_text: null,
+    options: null,
+    updated_at: new Date().toISOString()
+  });
+  stopAnswerPolling();
+}
+
+// Поллинг ответов игроков — раз в 2 сек читаем таблицу answers
+function startAnswerPolling() {
+  stopAnswerPolling();
+  pollAnswersNow();
+  answerPollTimer = setInterval(pollAnswersNow, 2000);
+}
+function stopAnswerPolling() {
+  if (answerPollTimer) { clearInterval(answerPollTimer); answerPollTimer = null; }
+}
+function pollAnswersNow() {
+  if (!GAME_ID || !currentQId) return;
+  restGetAnswers(GAME_ID, currentQId).then(function(rows) {
+    if (!Array.isArray(rows)) return;
+    var changed = false;
+    rows.forEach(function(row) {
+      var existing = liveAnswers[row.participant_id];
+      if (!existing || existing.answer !== row.answer) {
+        var isNew = !existing;
+        liveAnswers[row.participant_id] = { answer: row.answer, name: row.participant_name, editedAt: row.updated_at };
+        // Регистрируем участника если его ещё нет
+        if (!participants[row.participant_id]) {
+          addParticipant(row.participant_id, row.participant_name);
+        }
+        if (isNew) {
+          answersOrder.push({ id: row.participant_id, answer: row.answer, name: row.participant_name, time: Date.now() });
+        } else {
+          var rec = answersOrder.find(function(a){ return a.id === row.participant_id; });
+          if (rec) { rec.answer = row.answer; rec.edited = true; }
+        }
+        changed = true;
+      }
+    });
+    if (changed) {
+      updateLiveAnswers();
+      updateQScreenLive();
+    }
+  });
 }
 
 /* ══ TEAMS ══ */
@@ -1325,7 +1431,6 @@ function renderPodium() {
 }
 
 function sendFinalResults() {
-  // Отправляем каждому игроку его место и баллы
   var sorted = participantOrder.map(function(id) {
     return { id: id, name: participants[id].name, pts: participants[id].pts };
   }).sort(function(a, b) { return b.pts - a.pts; });
@@ -1333,24 +1438,41 @@ function sendFinalResults() {
   var results = {};
   sorted.forEach(function(p, i) { results[p.id] = { place: i + 1, pts: p.pts, total: sorted.length }; });
 
-  if (sbChannel) {
-    sbChannel.send({ type: 'broadcast', event: 'final-results', payload: { results: results } });
-  }
+  // Пишем финальные результаты в game_state (phase=final, results в options)
+  restSetGameState({
+    game_id: GAME_ID,
+    phase: 'final',
+    current_q_id: null,
+    question_text: null,
+    options: { results: results },
+    updated_at: new Date().toISOString()
+  });
   document.getElementById('final-continue-btn').textContent = '✅ Результаты отправлены!';
   document.getElementById('final-continue-btn').disabled = true;
+}
+
+// Поллинг присоединившихся участников (читаем спец-записи q_id='__join__')
+var participantPollTimer = null;
+function startParticipantPolling() {
+  if (participantPollTimer) clearInterval(participantPollTimer);
+  pollParticipantsNow();
+  participantPollTimer = setInterval(pollParticipantsNow, 3000);
+}
+function pollParticipantsNow() {
+  if (!GAME_ID) return;
+  restGetAnswers(GAME_ID, '__join__').then(function(rows) {
+    if (!Array.isArray(rows)) return;
+    rows.forEach(function(row) {
+      if (!participants[row.participant_id]) {
+        addParticipant(row.participant_id, row.participant_name);
+      }
+    });
+  });
 }
 
 /* ══ QR ══ */
 // Уникальный ID игровой сессии — генерируется один раз при загрузке страницы ведущего.
 // Встраивается в QR как ?game=xxx — участники используют его для идентификации сессии.
-var GAME_ID = (function() {
-  var stored = sessionStorage.getItem('quiz_game_id');
-  if (stored) return stored;
-  var id = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-  sessionStorage.setItem('quiz_game_id', id);
-  return id;
-})();
-
 function setupQR() {
   var href = window.location.href.split('?')[0]; // убираем старые параметры если есть
   var base = href.substring(0, href.lastIndexOf('/') + 1);
@@ -1517,8 +1639,18 @@ buildBoard();
 renderQrParticipants();
 buildScreenMap();
 document.getElementById('screen-intro').classList.add('active');
-ablyConnect();
 setupQR();
+// Записываем начальное состояние игры в БД (phase=waiting)
+restSetGameState({
+  game_id: GAME_ID,
+  phase: 'waiting',
+  current_q_id: null,
+  question_text: null,
+  options: null,
+  updated_at: new Date().toISOString()
+});
+// Поллинг участников (кто подключился) — раз в 3 сек читаем кто прислал ответы/присоединился
+startParticipantPolling();
 </script>
 </body>
 </html>

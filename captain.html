@@ -97,6 +97,7 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
     <div class="player-name" id="player-name-display"></div>
     <div class="conn" id="conn"></div>
   </div>
+  <button id="reconnect-btn" onclick="manualReconnectNow()" style="display:none;width:100%;padding:12px;margin-bottom:16px;border-radius:12px;border:1px solid var(--red);background:rgba(248,113,113,.1);color:var(--red);font-size:14px;font-weight:600;cursor:pointer">🔄 Связь потеряна — нажми чтобы переподключиться</button>
 
   <!-- Блок с текстом вопроса (скрыт пока нет вопроса) -->
   <div class="q-box" id="q-box" style="display:none">
@@ -138,15 +139,36 @@ body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--white);min-
 <script>
 var SUPABASE_URL = 'https://tdumnctlgdtscydmbxrg.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_lCYRT_995HnSgMTpesu9lQ_3JAAabNl';
-var CHANNEL  = 'quiz-room';
-var COLORS   = ['var(--gold)','var(--mint)','var(--purple)'];
-var BORDERS  = ['rgba(245,158,11,.4)','rgba(16,245,160,.4)','rgba(139,92,246,.4)'];
-var EMOJIS   = ['🥇','🥈','🥉'];
+var REST_URL = SUPABASE_URL + '/rest/v1';
+var REST_HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json'
+};
 
 var myId = '', myName = '';
 var currentQ = null, hasSent = false, lastSentAnswer = '';
-var sb, ch;
 var STORAGE_KEY = 'quiz_participant';
+
+// Читаем состояние игры из game_state
+function restGetGameState(gameId) {
+  var url = REST_URL + '/game_state?game_id=eq.' + encodeURIComponent(gameId) + '&select=*';
+  return fetch(url, { headers: REST_HEADERS })
+    .then(function(r){ return r.json(); })
+    .then(function(rows){ return Array.isArray(rows) && rows.length ? rows[0] : null; })
+    .catch(function(e){ console.warn('restGetGameState error:', e); return null; });
+}
+// Пишем/обновляем ответ игрока (upsert по game_id + q_id + participant_id)
+function restPutAnswer(gameId, qId, pid, pname, answer) {
+  return fetch(REST_URL + '/answers?on_conflict=game_id,q_id,participant_id', {
+    method: 'POST',
+    headers: Object.assign({}, REST_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+    body: JSON.stringify({
+      game_id: gameId, q_id: qId, participant_id: pid,
+      participant_name: pname, answer: answer, updated_at: new Date().toISOString()
+    })
+  });
+}
 
 // Читаем gameId из URL (?game=xxx) — он генерируется ведущим при каждой новой игре
 function getGameIdFromUrl() {
@@ -199,7 +221,7 @@ function backToTeams() {
   document.getElementById('name-input').value = '';
   clearSession();
   showPage('pg-name');
-  if (sb && ch) sb.removeChannel(ch);
+  if (statePollTimer) { clearInterval(statePollTimer); statePollTimer = null; }
 }
 
 /* ── Auto-resume on load ── */
@@ -221,124 +243,101 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-/* ── SUPABASE ── */
-var reconnectAttempt = 0;
+/* ── REST POLLING (без WebSocket — работает без VPN) ── */
 var lastKnownQId = null;
+var lastPhase = null;
+var statePollTimer = null;
 
 function connect() {
-  try {
-    if (ch) { try { sb.removeChannel(ch); } catch(e){} }
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    ch = sb.channel(CHANNEL, { config: { broadcast: { self: false } } });
+  // Регистрируем присоединение (спец-запись для ведущего)
+  restPutAnswer(currentGameId, '__join__', myId, myName, 'joined')
+    .then(function(){ document.getElementById('conn').className = 'conn ok'; })
+    .catch(function(){ document.getElementById('conn').className = 'conn err'; });
+  startStatePolling();
+}
 
-    ch.on('broadcast', { event: 'question-open' }, function(payload){
-      currentQ = payload.payload; lastKnownQId = payload.payload.id;
-      hasSent = false; showQ(payload.payload.text, payload.payload.options);
-    });
-    ch.on('broadcast', { event: 'question-close' }, function(){
-      currentQ = null; lastKnownQId = null; showWait();
-    });
-    ch.on('broadcast', { event: 'final-results' }, function(payload) {
-      var results = payload.payload && payload.payload.results;
-      if (!results || !myId || !results[myId]) return;
-      var r = results[myId];
-      var medals = { 1: '🥇', 2: '🥈', 3: '🥉' };
-      var medal = medals[r.place] || ('#' + r.place);
-      var isWinner = r.place === 1;
-      var qbox = document.getElementById('q-box');
-      if (qbox) qbox.style.display = 'none';
-      document.getElementById('state-wait').style.display = 'none';
-      document.getElementById('state-input').style.display = 'none';
-      document.getElementById('state-sent').style.display = 'none';
-      // Показываем финальный результат
-      var existing = document.getElementById('state-final');
-      if (!existing) {
-        var div = document.createElement('div');
-        div.id = 'state-final';
-        div.style.cssText = 'width:100%;text-align:center;padding:24px 0';
-        document.getElementById('pg-answer').appendChild(div);
-      }
-      document.getElementById('state-final').innerHTML =
-        '<div style="font-size:72px;margin-bottom:16px;animation:bounce 1s ease infinite alternate">' + medal + '</div>' +
-        '<div style="font-family:\'Syne\',sans-serif;font-size:28px;font-weight:800;color:' + (isWinner ? 'var(--gold)' : 'var(--white)') + ';margin-bottom:8px">' +
-          (isWinner ? 'Победитель!' : r.place + ' место') +
-        '</div>' +
-        '<div style="font-size:16px;color:var(--dim);margin-bottom:24px">' + r.pts + ' очков из ' + r.total + ' участников</div>' +
-        '<div style="font-size:14px;color:var(--mint);line-height:1.7">Спасибо за участие<br>в квизе! 🎂</div>';
-    });
-    ch.on('broadcast', { event: 'answers-locked' }, function(){
-      var hint = document.getElementById('edit-hint');
-      var area = document.getElementById('edit-area');
-      if (hint) hint.textContent = 'Время на изменение ответа истекло';
-      if (area) area.innerHTML = '';
-    });
-    ch.on('broadcast', { event: 'current-question' }, function(payload){
-      if (payload.payload) {
-        currentQ = payload.payload; lastKnownQId = payload.payload.id;
-        // Если уже отвечали на этот вопрос в этой сессии — восстанавливаем статус
+function startStatePolling() {
+  if (statePollTimer) clearInterval(statePollTimer);
+  pollStateNow();
+  statePollTimer = setInterval(pollStateNow, 2000); // каждые 2 сек
+}
+
+function pollStateNow() {
+  if (!currentGameId || !myId) return;
+  restGetGameState(currentGameId).then(function(state) {
+    if (!state) { document.getElementById('conn').className = 'conn err'; return; }
+    document.getElementById('conn').className = 'conn ok';
+
+    // Финал
+    if (state.phase === 'final') {
+      showFinalResult(state.options && state.options.results);
+      return;
+    }
+
+    // Активный вопрос
+    if (state.phase === 'question' && state.current_q_id) {
+      if (lastKnownQId !== state.current_q_id) {
+        // Новый вопрос
+        lastKnownQId = state.current_q_id;
+        currentQ = { id: state.current_q_id, text: state.question_text, options: state.options };
         var saved = getSavedSession();
-        if (saved && saved.lastQId === payload.payload.id) {
+        if (saved && saved.lastQId === state.current_q_id) {
           hasSent = true;
           showSent(lastSentAnswer || '(ответ отправлен)');
         } else {
           hasSent = false;
-          showQ(payload.payload.text, payload.payload.options);
+          showQ(state.question_text, state.options);
         }
-      } else {
-        currentQ = null; lastKnownQId = null; showWait();
       }
-    });
-
-    ch.subscribe(function(status){
-      if (status === 'SUBSCRIBED') {
-        reconnectAttempt = 0;
-        document.getElementById('conn').className = 'conn ok';
-        ch.send({ type: 'broadcast', event: 'participant-join', payload: { id: myId, name: myName } });
-        requestCurrentQuestion();
-      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-        document.getElementById('conn').className = 'conn err';
-        scheduleReconnect();
+    } else if (state.phase === 'waiting') {
+      if (lastKnownQId !== null || lastPhase !== 'waiting') {
+        lastKnownQId = null;
+        currentQ = null;
+        showWait();
       }
-    });
-  } catch(e) { showToast('Ошибка подключения', true); document.getElementById('conn').className = 'conn err'; scheduleReconnect(); }
+    }
+    lastPhase = state.phase;
+  });
 }
 
-function requestCurrentQuestion() {
-  setTimeout(function(){
-    if (ch) ch.send({ type: 'broadcast', event: 'request-current', payload: { id: myId } });
-  }, 800);
-}
-
-// Переподключение с нарастающей паузой (1с, 2с, 4с... максимум 8с)
-function scheduleReconnect() {
-  reconnectAttempt++;
-  var delay = Math.min(8000, 1000 * Math.pow(2, reconnectAttempt - 1));
-  setTimeout(function(){
-    if (myId) connect();
-  }, delay);
-}
-
-// Телефон "засыпает" когда экран блокируется или приложение уходит в фон —
-// WebSocket-соединение Supabase может оборваться без события. При возврате
-// на вкладку всегда принудительно переподключаемся и спрашиваем актуальный вопрос.
-document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'visible' && myId) {
-    connect();
+function showFinalResult(results) {
+  if (!results || !myId || !results[myId]) return;
+  if (statePollTimer) { clearInterval(statePollTimer); statePollTimer = null; }
+  var r = results[myId];
+  var medals = { 1: '🥇', 2: '🥈', 3: '🥉' };
+  var medal = medals[r.place] || ('#' + r.place);
+  var isWinner = r.place === 1;
+  var qbox = document.getElementById('q-box');
+  if (qbox) qbox.style.display = 'none';
+  document.getElementById('state-wait').style.display = 'none';
+  document.getElementById('state-input').style.display = 'none';
+  document.getElementById('state-sent').style.display = 'none';
+  var existing = document.getElementById('state-final');
+  if (!existing) {
+    var div = document.createElement('div');
+    div.id = 'state-final';
+    div.style.cssText = 'width:100%;text-align:center;padding:24px 0';
+    document.getElementById('pg-answer').appendChild(div);
   }
-});
-window.addEventListener('online', function() {
-  if (myId) connect();
-});
+  document.getElementById('state-final').innerHTML =
+    '<div style="font-size:72px;margin-bottom:16px;animation:bounce 1s ease infinite alternate">' + medal + '</div>' +
+    '<div style="font-family:\'Syne\',sans-serif;font-size:28px;font-weight:800;color:' + (isWinner ? 'var(--gold)' : 'var(--white)') + ';margin-bottom:8px">' +
+      (isWinner ? 'Победитель!' : r.place + ' место') +
+    '</div>' +
+    '<div style="font-size:16px;color:var(--dim);margin-bottom:24px">' + r.pts + ' очков из ' + r.total + ' участников</div>' +
+    '<div style="font-size:14px;color:var(--mint);line-height:1.7">Спасибо за участие<br>в квизе! 🎂</div>';
+}
 
-// Дополнительная подстраховка: раз в 20 секунд тихо проверяем что канал жив,
-// и если статус не «joined» — переподключаемся сами, без участия пользователя.
-setInterval(function() {
-  if (!myId || !ch) return;
-  var state = ch.state; // 'joined' | 'closed' | 'errored' | 'joining' | 'leaving'
-  if (state && state !== 'joined' && state !== 'joining') {
-    connect();
-  }
-}, 20000);
+// Ручная кнопка — просто форсит опрос состояния
+function manualReconnectNow() {
+  document.getElementById('conn').className = 'conn';
+  showToast('Обновляем...');
+  pollStateNow();
+}
+function updateReconnectBtn(show) {
+  var btn = document.getElementById('reconnect-btn');
+  if (btn) btn.style.display = show ? 'block' : 'none';
+}
 
 /* ── STATES ── */
 function showWait() {
@@ -413,19 +412,19 @@ function checkAns() {
   btn.className = 'send-btn ' + (v ? 'ready' : 'off');
 }
 function sendOptionAnswer(letter) {
-  if (!myId) return;
+  if (!myId || !currentQ) return;
   lastSentAnswer = letter;
-  ch.send({ type: 'broadcast', event: 'answer', payload: { id: myId, name: myName, answer: letter, questionId: currentQ && currentQ.id } })
-    .then(function(){ hasSent = true; saveSession(myId, myName, currentGameId, currentQ && currentQ.id); showSent(letter); showToast(hasSent ? '✅ Ответ обновлён!' : '✅ Ответ отправлен!'); })
+  restPutAnswer(currentGameId, currentQ.id, myId, myName, letter)
+    .then(function(){ hasSent = true; saveSession(myId, myName, currentGameId, currentQ.id); showSent(letter); showToast('✅ Ответ отправлен!'); })
     .catch(function(){ showToast('❌ Ошибка отправки', true); });
 }
 function sendAnswer(isEdit) {
   var inputId = isEdit ? 'edit-input' : 'ans-input';
   var v = document.getElementById(inputId).value.trim();
-  if (!v || !myId) return;
+  if (!v || !myId || !currentQ) return;
   lastSentAnswer = v;
-  ch.send({ type: 'broadcast', event: 'answer', payload: { id: myId, name: myName, answer: v, questionId: currentQ && currentQ.id } })
-    .then(function(){ hasSent = true; saveSession(myId, myName, currentGameId, currentQ && currentQ.id); showSent(v); showToast(isEdit ? '✅ Ответ обновлён!' : '✅ Ответ отправлен!'); })
+  restPutAnswer(currentGameId, currentQ.id, myId, myName, v)
+    .then(function(){ hasSent = true; saveSession(myId, myName, currentGameId, currentQ.id); showSent(v); showToast(isEdit ? '✅ Ответ обновлён!' : '✅ Ответ отправлен!'); })
     .catch(function(){ showToast('❌ Ошибка отправки', true); });
 }
 
