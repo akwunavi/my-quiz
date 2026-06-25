@@ -306,22 +306,26 @@ function pollStateNow() {
     // Активный вопрос
     if (state.phase === 'question' && state.current_q_id) {
       if (lastKnownQId !== state.current_q_id) {
-        // Новый вопрос
+        // Новый вопрос — сбрасываем всё и показываем
         lastKnownQId = state.current_q_id;
         currentQ = { id: state.current_q_id, text: state.question_text, options: state.options };
+        hasSent = false;
+        editUsed = false;
+        lastSentAnswer = '';
+        // Проверяем не отвечали ли уже на этот вопрос в этой сессии
         var saved = getSavedSession();
         if (saved && saved.lastQId === state.current_q_id) {
           hasSent = true;
           showSent(lastSentAnswer || '(ответ отправлен)');
         } else {
-          hasSent = false;
           showQ(state.question_text, state.options);
         }
       }
     } else if (state.phase === 'waiting') {
-      if (lastKnownQId !== null || lastPhase !== 'waiting') {
+      if (lastKnownQId !== null) {
         lastKnownQId = null;
         currentQ = null;
+        hasSent = false;
         showWait();
       }
     }
