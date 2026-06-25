@@ -159,8 +159,9 @@ function restGetGameState(gameId) {
     .then(function(rows){ return Array.isArray(rows) && rows.length ? rows[0] : null; })
     .catch(function(e){ console.warn('restGetGameState error:', e); return null; });
 }
-// Пишем/обновляем ответ игрока (upsert по game_id + q_id + participant_id)
-function restPutAnswer(gameId, qId, pid, pname, answer) {
+// Пишем/обновляем ответ игрока с повторной попыткой при ошибке
+function restPutAnswer(gameId, qId, pid, pname, answer, attempt) {
+  attempt = attempt || 1;
   return fetch(REST_URL + '/answers?on_conflict=game_id,q_id,participant_id', {
     method: 'POST',
     headers: Object.assign({}, REST_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
@@ -168,6 +169,25 @@ function restPutAnswer(gameId, qId, pid, pname, answer) {
       game_id: gameId, q_id: qId, participant_id: pid,
       participant_name: pname, answer: answer, updated_at: new Date().toISOString()
     })
+  }).then(function(r) {
+    if (!r.ok && attempt < 3) {
+      // Ответ не принят — повторяем через 2 сек
+      return new Promise(function(resolve) {
+        setTimeout(function() {
+          resolve(restPutAnswer(gameId, qId, pid, pname, answer, attempt + 1));
+        }, 2000);
+      });
+    }
+    return r;
+  }).catch(function(e) {
+    if (attempt < 3) {
+      return new Promise(function(resolve) {
+        setTimeout(function() {
+          resolve(restPutAnswer(gameId, qId, pid, pname, answer, attempt + 1));
+        }, 2000);
+      });
+    }
+    console.warn('restPutAnswer failed after 3 attempts:', e);
   });
 }
 

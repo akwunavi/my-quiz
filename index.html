@@ -325,8 +325,8 @@ audio.hidden-audio{display:none}
 <!-- INTRO -->
 <div class="screen centered active" id="screen-intro" style="justify-content:center;gap:0;padding:0">
   <p class="eyebrow" style="margin-bottom:12px">🎂 День рождения</p>
-  <h1 class="display">QUIZ<br>TIME</h1>
-  <p class="subtitle">Три раунда. Один победитель. Много смеха.</p>
+  <h1 class="display">IVAN<br>QUIZ<br>TIME</h1>
+  <p class="subtitle">Три раунда. Отдыхаем. Веселимся!</p>
   <div class="rounds-preview">
     <div class="round-pill">🖼️ Раунд 1 — Картинки</div>
     <div class="round-pill">🎵 Раунд 2 — Музыка</div>
@@ -518,7 +518,6 @@ var r3data = [
   {q:'Любимая серия книг?', a:'В', hint:'', voiceFile:'', options:['Харри Холе','50 оттенков серого','Гарри Поттер','Золотой компас']},
   {q:'Какой год на фотографии?', a:'Б', hint:'', voiceFile:'', options:['1990','1992','1994','1996'], img:'images/photo_12.jpg'},
 ];
-
 
 /* ══ SUPABASE REST API (без WebSocket — работает без VPN) ══ */
 var SUPABASE_URL = 'https://tdumnctlgdtscydmbxrg.supabase.co';
@@ -1386,7 +1385,7 @@ function startQuiz() { goTo('r1-intro'); }
 function renderPodium() {
   // Музыка финала — используем фоновый трек таймера или отдельный файл если есть
   try {
-    var fin = new Audio('music/song.mp3');
+    var fin = new Audio('music/final.mp3');
     fin.volume = 0.5;
     fin.play().catch(function() {
       // Если final.mp3 нет — включаем фоновый трек
@@ -1642,6 +1641,11 @@ buildScreenMap();
 document.getElementById('screen-intro').classList.add('active');
 setupQR();
 // Записываем начальное состояние игры в БД (phase=waiting)
+// и очищаем старые ответы этой сессии (на случай перезапуска)
+fetch(REST_URL + '/answers?game_id=eq.' + encodeURIComponent(GAME_ID), {
+  method: 'DELETE',
+  headers: REST_HEADERS
+}).catch(function(){});
 restSetGameState({
   game_id: GAME_ID,
   phase: 'waiting',
