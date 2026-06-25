@@ -148,6 +148,7 @@ var REST_HEADERS = {
 
 var myId = '', myName = '';
 var currentQ = null, hasSent = false, lastSentAnswer = '';
+var editUsed = false; // правка ответа использована (1 раз на вопрос)
 var STORAGE_KEY = 'quiz_participant';
 
 // Читаем состояние игры из game_state
@@ -259,8 +260,16 @@ function connect() {
 function startStatePolling() {
   if (statePollTimer) clearInterval(statePollTimer);
   pollStateNow();
-  statePollTimer = setInterval(pollStateNow, 2000); // каждые 2 сек
+  statePollTimer = setInterval(function() {
+    // Не опрашиваем когда вкладка свёрнута — экономим запросы
+    if (document.visibilityState === 'visible') pollStateNow();
+  }, 5000); // каждые 5 сек
 }
+
+// При возврате на вкладку — сразу опрашиваем (не ждём 5 сек)
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && myId) pollStateNow();
+});
 
 function pollStateNow() {
   if (!currentGameId || !myId) return;
@@ -353,6 +362,7 @@ function showQ(text, options) {
   document.getElementById('q-text').textContent = text;
   document.getElementById('q-text').className = 'q-box-text active';
   if (hasSent) { showSent(document.getElementById('sent-text').textContent); return; }
+  editUsed = false; // новый вопрос — сбрасываем счётчик правки
   document.getElementById('state-wait').style.display = 'none';
   document.getElementById('state-input').style.display = 'block';
   document.getElementById('state-sent').style.display = 'none';
@@ -390,6 +400,14 @@ function renderEditArea() {
   var area = document.getElementById('edit-area');
   var hint = document.getElementById('edit-hint');
   if (!currentQ) { area.innerHTML = ''; hint.style.display = 'none'; return; }
+
+  // Правка уже использована — блокируем, показываем сообщение
+  if (editUsed) {
+    hint.style.display = 'none';
+    area.innerHTML = '<p style="font-size:13px;color:var(--dim);text-align:center;margin-top:12px">✓ Ответ изменён. Изменить ещё раз нельзя.</p>';
+    return;
+  }
+
   hint.style.display = 'block';
   if (currentQ.options && currentQ.options.length) {
     var letters = ['А','Б','В','Г'];
@@ -401,7 +419,7 @@ function renderEditArea() {
   } else {
     area.innerHTML =
       '<input class="ans-input" id="edit-input" placeholder="Новый ответ..." autocomplete="off" autocorrect="off" spellcheck="false" value="' + (lastSentAnswer || '').replace(/"/g,'&quot;') + '">' +
-      '<button class="send-btn ready" onclick="sendAnswer(true)">Изменить ответ</button>';
+      '<button class="send-btn ready" onclick="sendAnswer(true)">Изменить ответ (1 раз)</button>';
   }
 }
 
@@ -413,18 +431,29 @@ function checkAns() {
 }
 function sendOptionAnswer(letter) {
   if (!myId || !currentQ) return;
+  if (hasSent && editUsed) return; // правка уже была — игнорируем
+  var wasEdit = hasSent; // если уже отправляли — это правка
   lastSentAnswer = letter;
   restPutAnswer(currentGameId, currentQ.id, myId, myName, letter)
-    .then(function(){ hasSent = true; saveSession(myId, myName, currentGameId, currentQ.id); showSent(letter); showToast('✅ Ответ отправлен!'); })
+    .then(function(){
+      if (wasEdit) editUsed = true;
+      hasSent = true; saveSession(myId, myName, currentGameId, currentQ.id);
+      showSent(letter); showToast(wasEdit ? '✅ Ответ изменён!' : '✅ Ответ отправлен!');
+    })
     .catch(function(){ showToast('❌ Ошибка отправки', true); });
 }
 function sendAnswer(isEdit) {
+  if (isEdit && editUsed) return; // правка уже была
   var inputId = isEdit ? 'edit-input' : 'ans-input';
   var v = document.getElementById(inputId).value.trim();
   if (!v || !myId || !currentQ) return;
   lastSentAnswer = v;
   restPutAnswer(currentGameId, currentQ.id, myId, myName, v)
-    .then(function(){ hasSent = true; saveSession(myId, myName, currentGameId, currentQ.id); showSent(v); showToast(isEdit ? '✅ Ответ обновлён!' : '✅ Ответ отправлен!'); })
+    .then(function(){
+      if (isEdit) editUsed = true;
+      hasSent = true; saveSession(myId, myName, currentGameId, currentQ.id);
+      showSent(v); showToast(isEdit ? '✅ Ответ изменён!' : '✅ Ответ отправлен!');
+    })
     .catch(function(){ showToast('❌ Ошибка отправки', true); });
 }
 

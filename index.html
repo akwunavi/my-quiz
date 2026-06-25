@@ -325,8 +325,8 @@ audio.hidden-audio{display:none}
 <!-- INTRO -->
 <div class="screen centered active" id="screen-intro" style="justify-content:center;gap:0;padding:0">
   <p class="eyebrow" style="margin-bottom:12px">🎂 День рождения</p>
-  <h1 class="display">IVAN<br>QUIZ<br>TIME</h1>
-  <p class="subtitle">Три раунда. Отдыхаем. Веселимся..</p>
+  <h1 class="display">QUIZ<br>TIME</h1>
+  <p class="subtitle">Три раунда. Один победитель. Много смеха.</p>
   <div class="rounds-preview">
     <div class="round-pill">🖼️ Раунд 1 — Картинки</div>
     <div class="round-pill">🎵 Раунд 2 — Музыка</div>
@@ -519,6 +519,7 @@ var r3data = [
   {q:'Какой год на фотографии?', a:'Б', hint:'', voiceFile:'', options:['1990','1992','1994','1996'], img:'images/photo_12.jpg'},
 ];
 
+
 /* ══ SUPABASE REST API (без WebSocket — работает без VPN) ══ */
 var SUPABASE_URL = 'https://tdumnctlgdtscydmbxrg.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_lCYRT_995HnSgMTpesu9lQ_3JAAabNl';
@@ -678,7 +679,7 @@ function closeQuestion() {
 function startAnswerPolling() {
   stopAnswerPolling();
   pollAnswersNow();
-  answerPollTimer = setInterval(pollAnswersNow, 2000);
+  answerPollTimer = setInterval(pollAnswersNow, 5000);
 }
 function stopAnswerPolling() {
   if (answerPollTimer) { clearInterval(answerPollTimer); answerPollTimer = null; }
@@ -1456,7 +1457,7 @@ var participantPollTimer = null;
 function startParticipantPolling() {
   if (participantPollTimer) clearInterval(participantPollTimer);
   pollParticipantsNow();
-  participantPollTimer = setInterval(pollParticipantsNow, 3000);
+  participantPollTimer = setInterval(pollParticipantsNow, 5000);
 }
 function pollParticipantsNow() {
   if (!GAME_ID) return;
