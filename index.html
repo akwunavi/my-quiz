@@ -297,6 +297,7 @@ audio.hidden-audio{display:none}
 .lb-place{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;min-width:50px}
 .lb-name{flex:1;font-size:24px;font-weight:700}
 .lb-pts{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--white)}
+.lb-round-col{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:rgba(255,255,255,.5);min-width:40px;text-align:center}
 .lb-continue{margin-top:24px;max-width:280px}
 .final-sub{font-size:15px;color:var(--dim);text-align:center;margin-bottom:28px}
 .podium{max-width:580px;width:100%;margin-bottom:32px;max-height:60vh;overflow-y:auto}
@@ -325,8 +326,8 @@ audio.hidden-audio{display:none}
 <!-- INTRO -->
 <div class="screen centered active" id="screen-intro" style="justify-content:center;gap:0;padding:0">
   <p class="eyebrow" style="margin-bottom:12px">🎂 День рождения</p>
-  <h1 class="display">IVAN<br>QUIZ<br>PARTY</h1>
-  <p class="subtitle">Три раунда. Отдыхаем. Веселимся.!</p>
+  <h1 class="display">IVAN<br>QUIZ PARTY</h1>
+  <p class="subtitle">Три раунда. Отдыхаем. Веселимся!</p>
   <div class="rounds-preview">
     <div class="round-pill">🖼️ Раунд 1 — Картинки</div>
     <div class="round-pill">🎵 Раунд 2 — Музыка</div>
@@ -380,7 +381,7 @@ audio.hidden-audio{display:none}
   <p class="round-badge">🖼️ Раунд первый</p>
   <div class="line" style="color:var(--gold)"></div>
   <h2 class="round-title">КАР-<br>ТИН-<br>КИ</h2>
-  <p class="round-desc">Вы увидите 10 картинок звезд, скрытых за вашими лицами. Надо понять что за звезда спряталась. Каждый правильный ответ — 1 балл</p>
+  <p class="round-desc">Вы увидите 10 картинок звезд, скрытых за вашими лицами. Надо понять что за звезда спряталась. Каждый правильный ответ — 1 балл.</p>
   <button class="btn btn-gold" onclick="goTo('r1-q1')">Начать раунд →</button>
 </div>
 <div id="r1-questions"></div>
@@ -391,8 +392,8 @@ audio.hidden-audio{display:none}
   <div class="orb"></div><div class="round-num">2</div>
   <p class="round-badge">🎵 Раунд второй</p>
   <div class="line" style="color:var(--mint)"></div>
-  <h2 class="round-title">МУ-<br>ЗЫ-<br>КА</h2>
-  <p class="round-desc">Своя игра — выбирай тему и сложность. Отвечаем на скорость. Кто первый правильно ответит - заберет баллы.</p>
+  <h2 class="round-title">МУЗЫ-<br>КАЛЬ-<br>НАЯ</h2>
+  <p class="round-desc">Всё как в своей игре — выбирай тему и сложность. Отвечаем на скорость. Кто первый правильно ответит - заберет баллы а также выбирает следующий трек.</p>
   <button class="btn btn-mint" onclick="goTo('r2-board')">Открыть доску →</button>
 </div>
 
@@ -477,7 +478,7 @@ var BG_MUSIC_FILE   = 'music/song.mp3';
 var BG_MUSIC_VOLUME = 0.35;
 var TIMER_SECONDS   = 30;
 
-var r1data = [
+data = [
   {q:'Санька с волосами видели? Вот сейчас увидели!', a:'Аркадий Укупник', hint:'', img:'images/photo_4.jpg', imgAnswer:'images/ans_4.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Мэрелин Монро', hint:'', img:'images/photo_9.jpg', imgAnswer:'images/ans_9.jpg'},
   {q:'Кто это тут спрятался за твоим лицом?', a:'Сидни Суини', hint:'', img:'images/photo_2.jpg', imgAnswer:'images/ans_2.jpg'},
@@ -499,10 +500,10 @@ var categories = [
 ];
 
 var musicData = {
-  0:{'0.5':{q:'Угадай исполнителя',a:'Сплин',file:'music/song_1_1.mp3'},'1':{q:'Угадай исполнителя',a:'МумийТролль',file:'music/song_1_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'7Б',file:'music/song_1_3.mp3'},'2':{q:'Угадай исполнителя',a:'LOUNA',file:'music/song_1_4.mp3'}},
+  0:{'0.5':{q:'Угадай исполнителя',a:'Сплин',file:'music/song_1_1.mp3'},'1':{q:'Угадай исполнителя',a:'МумийТролль',file:'music/song_1_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'Слот',file:'music/song_1_3.mp3'},'2':{q:'Угадай исполнителя',a:'Найк Борзов',file:'music/song_1_4.mp3'}},
   1:{'0.5':{q:'Угадай исполнителя',a:'ВиаГра',file:'music/song_2_1.mp3'},'1':{q:'Угадай исполнителя',a:'Madonna',file:'music/song_2_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'Иванушки int',file:'music/song_2_3.mp3'},'2':{q:'Угадай исполнителя',a:'Джордж Майкл',file:'music/song_2_4.mp3'}},
   2:{'0.5':{q:'Угадай исполнителя',a:'CREAM SODA',file:'music/song_3_1.mp3'},'1':{q:'Угадай исполнителя',a:'BAD OMENS',file:'music/song_3_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'Линда',file:'music/song_3_3.mp3'},'2':{q:'Угадай исполнителя',a:'Teriyaki Boyz',file:'music/song_3_4.mp3'}},
-  3:{'0.5':{q:'Угадай исполнителя',a:'Ирина Аллегрова',file:'music/song_4_1.mp3'},'1':{q:'Угадай исполнителя',a:'Scorpions',file:'music/song_4_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'Sher',file:'music/song_4_3.mp3'},'2':{q:'Угадай исполнителя',a:'Кар-мен',file:'music/song_4_4.mp3'}},
+  3:{'0.5':{q:'Угадай исполнителя',a:'Sher',file:'music/song_4_1.mp3'},'1':{q:'Угадай исполнителя',a:'Scorpions',file:'music/song_4_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'Ирина Аллегрова',file:'music/song_4_3.mp3'},'2':{q:'Угадай исполнителя',a:'Кар-мен',file:'music/song_4_4.mp3'}},
   4:{'0.5':{q:'Угадай исполнителя',a:'Linkin Park',file:'music/song_5_1.mp3'},'1':{q:'Угадай исполнителя',a:'Charli XCX',file:'music/song_5_2.mp3'},'1.5':{q:'Угадай исполнителя',a:'E-type',file:'music/song_5_3.mp3'},'2':{q:'Угадай исполнителя',a:'Foals',file:'music/song_5_4.mp3'}},
 };
 
@@ -515,7 +516,7 @@ var r3data = [
   {q:'Какой вид выпечки у меня никогда не получался?', a:'Г', hint:'', voiceFile:'', options:['Багет','Морковный торт','Пирожки','Макаруны']},
   {q:'В какой стране я не был?', a:'В', hint:'', voiceFile:'', options:['Грузия','Азербайджан','Армения','Индия']},
   {q:'Любимый алкогольный напиток', a:'Г', hint:'', voiceFile:'', options:['Пиво','Водка','Игристое','Белое вино']},
-  {q:'Любимая серия книг?', a:'В', hint:'', voiceFile:'', options:['Харри Холе','50 оттенков серого','Гарри Поттер','Золотой компас']},
+  {q:'Любимая серия книг?', a:'В', hint:'', voiceFile:'', options:['Харри Холе','Властелин колец','Гарри Поттер','Золотой компас']},
   {q:'Какой год на фотографии?', a:'Б', hint:'', voiceFile:'', options:['1990','1992','1994','1996'], img:'images/photo_12.jpg'},
 ];
 
@@ -997,11 +998,13 @@ function buildQuestions(data, round, nextScreen) {
     var aId = 'r' + round + '-a' + num;
     var isLast = num === total;
     var nextTarget = isLast ? nextScreen : ('r' + round + '-q' + (num + 1));
-    var nextLabel = isLast ? (round === 1 ? 'Раунд 2 →' : 'Финал 🎉') : 'Следующий →';
+    var nextLabel = isLast ? (round === 1 ? 'Раунд 2 →' : round === 3 ? 'Итоги 🏆' : 'Финал 🎉') : 'Следующий →';
     var nextClass = isLast ? (round === 1 ? 'btn-gold' : 'btn-primary') : 'btn-secondary';
-    // Раунд 1 после последнего вопроса идёт через титры; раунд 3 — сразу в финал
+    // Раунд 1 и 3 после последнего вопроса идут через лидерборд
     var nextOnClick = (isLast && round === 1)
       ? "stopTimer();closeQuestion();showLeaderboard('" + nextTarget + "')"
+      : (isLast && round === 3)
+      ? "stopTimer();closeQuestion();showLeaderboard('final')"
       : "stopTimer();closeQuestion();goTo('" + nextTarget + "')";
     var hasImg = item.img ? true : false;
     var hasVoice = round === 3 && item.voiceFile;
@@ -1527,10 +1530,12 @@ var STEP_MS = 400; // 0.4 сек на участника
 
 function showLeaderboard(afterTarget) {
   goTo('leaderboard');
+  var isAfterR2 = afterTarget === 'r3-intro';
+  var isAfterR3 = afterTarget === 'final';
   document.getElementById('lb-eye').textContent =
-    afterTarget === 'r2-intro' ? '📊 ИТОГИ РАУНДА 1' : '📊 ИТОГИ РАУНДА 2';
+    afterTarget === 'r2-intro' ? '📊 ИТОГИ РАУНДА 1' :
+    isAfterR2 ? '📊 ИТОГИ РАУНДОВ 1–2' : '📊 ФИНАЛЬНЫЙ СЧЁТ';
 
-  // Сортируем участников по убыванию очков
   var sorted = participantOrder.map(function(id) { return { id: id, p: participants[id] }; })
     .sort(function(a, b) { return b.p.pts - a.p.pts; });
 
@@ -1539,7 +1544,6 @@ function showLeaderboard(afterTarget) {
   continueBtn.style.display = 'none';
   continueBtn.onclick = function() { goTo(afterTarget); };
 
-  // Очищаем предыдущие таймеры на случай повторного вызова
   lbTimeouts.forEach(function(t){ clearTimeout(t); });
   lbTimeouts = [];
 
@@ -1549,18 +1553,34 @@ function showLeaderboard(afterTarget) {
     return;
   }
 
-  // Строим строки заранее (снизу = последнее место первым), скрытые
-  list.innerHTML = sorted.map(function(item, idx) {
+  // Заголовок колонок
+  var showR3 = isAfterR3;
+  var headerCols = '<span class="lb-place"></span><span class="lb-name"></span>';
+  if (isAfterR2 || isAfterR3) headerCols += '<span class="lb-round-col" style="color:var(--dim);font-size:12px">R1</span>';
+  if (isAfterR2 || isAfterR3) headerCols += '<span class="lb-round-col" style="color:var(--dim);font-size:12px">R2</span>';
+  if (isAfterR3) headerCols += '<span class="lb-round-col" style="color:var(--dim);font-size:12px">R3</span>';
+  if (isAfterR2 || isAfterR3) headerCols += '<span class="lb-pts" style="color:var(--dim);font-size:12px">ИТОГО</span>';
+  else headerCols += '<span class="lb-pts" style="color:var(--dim);font-size:12px">БАЛЛЫ</span>';
+
+  list.innerHTML = '<div class="lb-row" style="opacity:.5;border:none;background:none;padding:4px 22px;margin-bottom:4px">' + headerCols + '</div>' +
+  sorted.map(function(item, idx) {
     var place = idx + 1;
     var medal = place === 1 ? '🥇' : place === 2 ? '🥈' : place === 3 ? '🥉' : ('#' + place);
+    var r = item.p.ptsByRound || {};
+    var r1 = r[1] || 0, r2 = r[2] || 0, r3 = r[3] || 0;
+    var cols = '';
+    if (isAfterR2 || isAfterR3) cols += '<span class="lb-round-col">' + r1 + '</span>';
+    if (isAfterR2 || isAfterR3) cols += '<span class="lb-round-col">' + r2 + '</span>';
+    if (isAfterR3) cols += '<span class="lb-round-col">' + r3 + '</span>';
+    var pts = (isAfterR2 || isAfterR3) ? item.p.pts : item.p.pts;
     return '<div class="lb-row" id="lb-row-' + idx + '" style="opacity:0;transform:translateY(16px)">' +
       '<span class="lb-place">' + medal + '</span>' +
       '<span class="lb-name" style="color:' + colorFor(item.id) + '">' + item.p.name + '</span>' +
-      '<span class="lb-pts">' + item.p.pts + '</span>' +
-      '</div>';
+      cols +
+      '<span class="lb-pts">' + pts + '</span>' +
+    '</div>';
   }).join('');
 
-  // Анимация снизу вверх: последнее место появляется первым
   var n = sorted.length;
   for (var i = n - 1; i >= 0; i--) {
     (function(idx) {
@@ -1575,9 +1595,6 @@ function showLeaderboard(afterTarget) {
       lbTimeouts.push(t);
     })(i);
   }
-}
-function finishLeaderboard() {
-  // запасной обработчик, реальная логика — в onclick кнопки (afterTarget)
 }
 
 function goTo(id) {
