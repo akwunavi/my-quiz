@@ -281,9 +281,8 @@ function startStatePolling() {
   if (statePollTimer) clearInterval(statePollTimer);
   pollStateNow();
   statePollTimer = setInterval(function() {
-    // Не опрашиваем когда вкладка свёрнута — экономим запросы
     if (document.visibilityState === 'visible') pollStateNow();
-  }, 5000); // каждые 5 сек
+  }, 2000); // каждые 2 сек
 }
 
 // При возврате на вкладку — сразу опрашиваем (не ждём 5 сек)
@@ -322,12 +321,10 @@ function pollStateNow() {
         }
       }
     } else if (state.phase === 'waiting') {
-      if (lastKnownQId !== null) {
-        lastKnownQId = null;
-        currentQ = null;
-        hasSent = false;
-        showWait();
-      }
+      lastKnownQId = null;
+      currentQ = null;
+      hasSent = false;
+      showWait();
     }
     lastPhase = state.phase;
   });

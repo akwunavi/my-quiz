@@ -325,8 +325,8 @@ audio.hidden-audio{display:none}
 <!-- INTRO -->
 <div class="screen centered active" id="screen-intro" style="justify-content:center;gap:0;padding:0">
   <p class="eyebrow" style="margin-bottom:12px">🎂 День рождения</p>
-  <h1 class="display">QUIZ<br>TIME</h1>
-  <p class="subtitle">Три раунда. Один победитель. Много смеха.</p>
+  <h1 class="display">IVAN<br>QUIZ<br>PARTY</h1>
+  <p class="subtitle">Три раунда. Отдыхаем. Веселимся.!</p>
   <div class="rounds-preview">
     <div class="round-pill">🖼️ Раунд 1 — Картинки</div>
     <div class="round-pill">🎵 Раунд 2 — Музыка</div>
@@ -380,7 +380,7 @@ audio.hidden-audio{display:none}
   <p class="round-badge">🖼️ Раунд первый</p>
   <div class="line" style="color:var(--gold)"></div>
   <h2 class="round-title">КАР-<br>ТИН-<br>КИ</h2>
-  <p class="round-desc">Вы увидите 10 картинок звезд, скрытых за вашими лицами. Надо понять что за звезда спряталась. Каждый правильный ответ — 1 балл.</p>
+  <p class="round-desc">Вы увидите 10 картинок звезд, скрытых за вашими лицами. Надо понять что за звезда спряталась. Каждый правильный ответ — 1 балл</p>
   <button class="btn btn-gold" onclick="goTo('r1-q1')">Начать раунд →</button>
 </div>
 <div id="r1-questions"></div>
@@ -519,7 +519,6 @@ var r3data = [
   {q:'Какой год на фотографии?', a:'Б', hint:'', voiceFile:'', options:['1990','1992','1994','1996'], img:'images/photo_12.jpg'},
 ];
 
-
 /* ══ SUPABASE REST API (без WebSocket — работает без VPN) ══ */
 var SUPABASE_URL = 'https://tdumnctlgdtscydmbxrg.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_lCYRT_995HnSgMTpesu9lQ_3JAAabNl';
@@ -649,15 +648,27 @@ var answerPollTimer = null;
 function publishQuestion(id, text, activeTeam, options) {
   currentQId = id; liveAnswers = {}; answersOrder = [];
   currentQPayload = { id: id, text: text, activeTeam: activeTeam, options: options || null };
-  // Один атомарный запрос — сразу пишем новый вопрос
-  // Телефон сравнивает current_q_id и сбрасывает состояние если ID изменился
+  // Сначала пишем waiting — телефоны гарантированно сбрасывают предыдущий вопрос
   restSetGameState({
     game_id: GAME_ID,
-    phase: 'question',
-    current_q_id: id,
-    question_text: text,
-    options: options || null,
+    phase: 'waiting',
+    current_q_id: null,
+    question_text: null,
+    options: null,
     updated_at: new Date().toISOString()
+  }).then(function() {
+    // Пауза 1.5 сек — телефоны успевают прочитать waiting и сбросить lastKnownQId
+    return new Promise(function(resolve) { setTimeout(resolve, 1500); });
+  }).then(function() {
+    // Теперь пишем новый вопрос
+    return restSetGameState({
+      game_id: GAME_ID,
+      phase: 'question',
+      current_q_id: id,
+      question_text: text,
+      options: options || null,
+      updated_at: new Date().toISOString()
+    });
   });
   startAnswerPolling();
 }
@@ -679,7 +690,7 @@ function closeQuestion() {
 function startAnswerPolling() {
   stopAnswerPolling();
   pollAnswersNow();
-  answerPollTimer = setInterval(pollAnswersNow, 5000);
+  answerPollTimer = setInterval(pollAnswersNow, 2000);
 }
 function stopAnswerPolling() {
   if (answerPollTimer) { clearInterval(answerPollTimer); answerPollTimer = null; }
@@ -1386,7 +1397,7 @@ function startQuiz() { goTo('r1-intro'); }
 function renderPodium() {
   // Музыка финала — используем фоновый трек таймера или отдельный файл если есть
   try {
-    var fin = new Audio('music/final.mp3');
+    var fin = new Audio('music/song.mp3');
     fin.volume = 0.5;
     fin.play().catch(function() {
       // Если final.mp3 нет — включаем фоновый трек
@@ -1457,7 +1468,7 @@ var participantPollTimer = null;
 function startParticipantPolling() {
   if (participantPollTimer) clearInterval(participantPollTimer);
   pollParticipantsNow();
-  participantPollTimer = setInterval(pollParticipantsNow, 5000);
+  participantPollTimer = setInterval(pollParticipantsNow, 2000);
 }
 function pollParticipantsNow() {
   if (!GAME_ID) return;
